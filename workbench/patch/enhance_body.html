@@ -1,0 +1,81 @@
+
+  <!-- ===== 云同步设置弹窗 ===== -->
+  <div class="modal-overlay" id="syncModal">
+    <div class="modal-content" style="max-width:680px;">
+      <button class="close-btn" onclick="closeSyncModal()">✕</button>
+      <h2>☁️ 云端同步设置（Supabase）</h2>
+
+      <div class="sync-status-box" id="syncStatusBox">当前状态：未配置</div>
+
+      <div class="sync-form-row">
+        <label>Project URL</label>
+        <input type="text" id="syncUrl" placeholder="https://xxxxxxxxxxxx.supabase.co" autocomplete="off" spellcheck="false" />
+        <div class="hint">Supabase 控制台 → Project Settings → Data API → Project URL</div>
+      </div>
+
+      <div class="sync-form-row">
+        <label>anon public key</label>
+        <input type="password" id="syncKey" placeholder="eyJhbGciOi..." autocomplete="off" spellcheck="false" />
+        <div class="hint">
+          同一页面的 API Keys → <b>anon / public</b>（可公开的那把，不要用 service_role）
+          <label style="display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-weight:400;cursor:pointer;">
+            <input type="checkbox" id="syncKeyShow" onchange="document.getElementById('syncKey').type=this.checked?'text':'password'" style="width:auto;" /> 显示
+          </label>
+        </div>
+      </div>
+
+      <div class="sync-form-row">
+        <label>同步空间 ID</label>
+        <input type="text" id="syncSpace" placeholder="例如：myname-work" autocomplete="off" spellcheck="false" />
+        <div class="hint">用于隔离数据。<b>所有设备必须填写完全相同的空间 ID</b>，才能互相同步。</div>
+      </div>
+
+      <div class="btn-group" style="margin-top:6px;flex-wrap:wrap;gap:8px;">
+        <button class="btn-save" onclick="saveSyncConfig()">💾 保存并连接</button>
+        <button class="btn-refresh-stat" onclick="manualSyncNow()">🔄 立即同步</button>
+        <button class="btn-sm" onclick="testSyncConnection()">🔌 测试连接</button>
+        <button class="btn-reset" onclick="disconnectSync()">⏻ 断开并清除配置</button>
+      </div>
+
+      <details class="sync-help">
+        <summary>📖 还没有 Supabase？点这里看 5 步配置指引</summary>
+        <ol>
+          <li>打开 <b>supabase.com</b> → Start your project → 用 GitHub 或邮箱注册（免费）。</li>
+          <li>New project → 填项目名、设置数据库密码 → 地区建议选 <b>Southeast Asia (Singapore)</b> → Create。等待约 2 分钟。</li>
+          <li>左侧 <b>SQL Editor</b> → New query → 粘贴下方建表 SQL → 点 <b>Run</b>。</li>
+          <li>左侧 <b>Project Settings → Data API</b>，复制 <b>Project URL</b> 和 <b>anon public</b> 密钥。</li>
+          <li>粘贴回上面两个输入框，自定义一个空间 ID，点「保存并连接」。其他设备打开同一网址、填相同的三项即可同步。</li>
+        </ol>
+        <div style="margin:12px 0 6px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          建表 SQL
+          <button class="btn-sm" onclick="copySyncSql()">📋 复制 SQL</button>
+        </div>
+        <div class="sync-sql" id="syncSqlBox">create table if not exists public.wb_kv (
+  space      text        not null,
+  k          text        not null,
+  v          jsonb       not null,
+  updated_at timestamptz not null default now(),
+  primary key (space, k)
+);
+
+alter table public.wb_kv enable row level security;
+
+drop policy if exists "wb_kv_anon_all" on public.wb_kv;
+create policy "wb_kv_anon_all" on public.wb_kv
+  for all to anon
+  using (true) with check (true);
+
+-- ✅ 上面三段一次粘贴运行即可。若运行后仍报错 PGRST125，再单独执行下面这句刷新缓存（一般无需）：
+-- NOTIFY pgrst, 'reload schema';
+
+-- 验证：返回表名说明建表成功
+select to_regclass('public.wb_kv');</div>
+        <div class="hint" style="margin-top:8px;">
+          注意：该策略允许持有 anon key 的人读写此表。空间 ID 相当于你的私人命名空间，请勿把 URL + key + 空间 ID 同时公开。<br/>
+          <b>常见坑：</b>建表 SQL 一定要在「你填的 Project URL 所属项目」里运行；若表已存在却仍报 PGRST125，执行上面的 <code>NOTIFY pgrst</code> 刷新缓存即可。
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div id="wbToastWrap"></div>

@@ -1,0 +1,170 @@
+  <!-- ===== 商机雷达面板 ===== -->
+  <div class="panel" id="panel-radar">
+    <div class="mod-wrap">
+
+      <!-- ① 一键深搜 -->
+      <div class="mod-section">
+        <h3>📡 一键深搜 <span class="mod-sub">官方免费渠道 + 公开聚合，预填关键词直达搜索结果</span></h3>
+        <div class="mod-row" style="margin-bottom:12px;">
+          <input class="mod-input" id="radarSearchKw" placeholder="输入关键词，如：职工运动会 / 文旅节 / 团建" value="活动 赛事 团建" />
+          <button class="btn-mod go" onclick="radarSearchAll()">🔍 全部渠道搜这个词</button>
+        </div>
+        <div class="source-grid" id="radarSources"></div>
+      </div>
+
+      <!-- ② 订阅关键词库 -->
+      <div class="mod-section">
+        <h3>🔖 订阅关键词库 <span class="mod-sub">复制即用，覆盖你文档里的标准检索词</span></h3>
+        <textarea class="kw-area" id="radarKw" placeholder="每行一个关键词"></textarea>
+        <div class="kw-chips" id="radarKwChips"></div>
+        <div class="mod-row" style="margin-top:12px;">
+          <button class="btn-mod primary" onclick="saveRadarKw()">💾 保存关键词</button>
+          <button class="btn-mod" onclick="copyRadarKw()">📋 复制全部</button>
+          <button class="btn-mod" onclick="genRadarQuery()">🧩 生成检索句式</button>
+          <button class="btn-mod" onclick="resetRadarKw()">↺ 恢复默认词库</button>
+        </div>
+        <div id="radarQueryOut" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- ③ 每日巡检清单 -->
+      <div class="mod-section">
+        <h3>✅ 每日巡检清单 <span class="mod-sub">对照你文档的「每日固定工作流程」，今日该刷的源</span></h3>
+        <div class="check-progress" id="radarCheckProgress"></div>
+        <div class="check-list" id="radarChecklist"></div>
+        <div class="mod-row" style="margin-top:10px;">
+          <button class="btn-mod" onclick="resetRadarCheck()">↺ 重置今日清单</button>
+        </div>
+      </div>
+
+      <!-- ④ 商机台账 -->
+      <div class="mod-section">
+        <h3>📋 商机台账 <span class="mod-sub">你点开搜到后，在此结构化沉淀；自动同步、跨设备可用</span></h3>
+        <div class="ledger-tools">
+          <input class="mod-input" id="radarFilter" placeholder="搜索单位 / 项目 / 对接人" style="max-width:240px;" oninput="renderRadarLedger()" />
+          <select class="mod-input" id="radarFilterType" style="max-width:160px;" onchange="renderRadarLedger()">
+            <option value="">全部类型</option>
+            <option>招标公告</option><option>采购意向</option><option>比选公告</option>
+            <option>服务商招募</option><option>中标公告</option>
+          </select>
+          <select class="mod-input" id="radarFilterStatus" style="max-width:140px;" onchange="renderRadarLedger()">
+            <option value="">全部状态</option>
+            <option>待跟进</option><option>跟进中</option><option>已投标</option>
+            <option>中标</option><option>未中标</option><option>放弃</option>
+          </select>
+          <button class="btn-mod primary" onclick="toggleRadarForm()">➕ 新增商机</button>
+          <button class="btn-mod" onclick="exportRadarCSV()">📤 导出CSV</button>
+        </div>
+        <div id="radarForm" style="display:none; border:1px dashed var(--card-border); border-radius:8px; padding:14px; margin-bottom:12px; background:#fbfdff;">
+          <div class="mod-row" style="margin-bottom:8px;">
+            <input class="mod-input" id="rfUnit" placeholder="单位名称 *" />
+            <input class="mod-input" id="rfName" placeholder="项目名称 *" />
+          </div>
+          <div class="mod-row" style="margin-bottom:8px;">
+            <select class="mod-input" id="rfType"><option>招标公告</option><option>采购意向</option><option>比选公告</option><option>服务商招募</option><option>中标公告</option></select>
+            <input class="mod-input" id="rfBudget" placeholder="预算（如 15万）" />
+            <input class="mod-input" id="rfDeadline" type="date" placeholder="截止日期" />
+          </div>
+          <div class="mod-row" style="margin-bottom:8px;">
+            <input class="mod-input" id="rfContact" placeholder="对接人" />
+            <input class="mod-input" id="rfPhone" placeholder="电话" />
+            <input class="mod-input" id="rfLink" placeholder="来源链接" />
+          </div>
+          <div class="mod-row" style="margin-bottom:8px;">
+            <select class="mod-input" id="rfStatus"><option>待跟进</option><option>跟进中</option><option>已投标</option><option>中标</option><option>未中标</option><option>放弃</option></select>
+            <input class="mod-input" id="rfNote" placeholder="备注 / 痛点 / 切入角度" />
+          </div>
+          <div class="mod-row">
+            <button class="btn-mod go" onclick="addRadarItem()">💾 保存</button>
+            <button class="btn-mod" onclick="toggleRadarForm()">取消</button>
+          </div>
+        </div>
+        <div class="ledger-scroll">
+          <table class="ledger-table" id="radarLedger"></table>
+        </div>
+      </div>
+
+      <!-- ⑤ 客户采购画像 -->
+      <div class="mod-section">
+        <h3>🎯 客户采购画像 <span class="mod-sub">从你的台账自动统计：谁在持续买活动、买什么、花多少</span></h3>
+        <div class="profile-grid" id="radarProfile"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 案例智库面板 ===== -->
+  <div class="panel" id="panel-cases">
+    <div class="mod-wrap">
+
+      <!-- ① 一键深搜案例平台 -->
+      <div class="mod-section">
+        <h3>💡 一键深搜案例平台 <span class="mod-sub">数英网 / 广告门 / 活动行 / 梅花网 等公开站，预填词直达</span></h3>
+        <div class="mod-row" style="margin-bottom:12px;">
+          <input class="mod-input" id="caseSearchKw" placeholder="输入关键词，如：趣味运动会 / 发布会 / 快闪" value="活动 策划 案例" />
+          <button class="btn-mod go" onclick="caseSearchAll()">🔍 全部平台搜这个词</button>
+        </div>
+        <div class="source-grid" id="caseSources"></div>
+      </div>
+
+      <!-- ② 本地案例库 -->
+      <div class="mod-section">
+        <h3>📚 本地案例库 <span class="mod-sub">你看到的优秀案例，在此打标签沉淀；支持 Excel 那样的检索</span></h3>
+        <div class="ledger-tools">
+          <input class="mod-input" id="caseFilter" placeholder="搜索标题 / 亮点 / 标签" style="max-width:240px;" oninput="renderCaseLib()" />
+          <select class="mod-input" id="caseFilterType" style="max-width:160px;" onchange="renderCaseLib()">
+            <option value="">全部类型</option>
+            <option>团建拓展</option><option>职工运动会</option><option>年会庆典</option>
+            <option>品牌发布会</option><option>文旅赛事</option><option>党建活动</option>
+            <option>城市节庆</option><option>其他</option>
+          </select>
+          <button class="btn-mod primary" onclick="toggleCaseForm()">➕ 新增案例</button>
+        </div>
+        <div id="caseForm" style="display:none; border:1px dashed var(--card-border); border-radius:8px; padding:14px; margin-bottom:12px; background:#fbfdff;">
+          <div class="mod-row" style="margin-bottom:8px;">
+            <input class="mod-input" id="cfTitle" placeholder="案例标题 *" />
+            <select class="mod-input" id="cfType"><option>团建拓展</option><option>职工运动会</option><option>年会庆典</option><option>品牌发布会</option><option>文旅赛事</option><option>党建活动</option><option>城市节庆</option><option>其他</option></select>
+          </div>
+          <div class="mod-row" style="margin-bottom:8px;">
+            <select class="mod-input" id="cfIndustry"><option>金融银行</option><option>汽车</option><option>政府事业单位</option><option>互联网科技</option><option>文旅</option><option>快消</option><option>能源</option><option>其他</option></select>
+            <select class="mod-input" id="cfBudget"><option>不限</option><option>&lt;5万</option><option>5-20万</option><option>20-50万</option><option>50-100万</option><option>&gt;100万</option></select>
+            <input class="mod-input" id="cfLink" placeholder="案例链接" />
+          </div>
+          <div class="mod-row" style="margin-bottom:8px;">
+            <input class="mod-input" id="cfTags" placeholder="标签（逗号分隔，如：互动,破圈,户外）" />
+            <input class="mod-input" id="cfNote" placeholder="亮点 / 创意点 / 可借鉴之处" />
+          </div>
+          <div class="mod-row">
+            <button class="btn-mod go" onclick="addCase()">💾 保存</button>
+            <button class="btn-mod" onclick="toggleCaseForm()">取消</button>
+          </div>
+        </div>
+        <div class="case-grid" id="caseLibrary"></div>
+      </div>
+
+      <!-- ③ 场景化智能推荐 -->
+      <div class="mod-section">
+        <h3>🤖 场景化智能推荐 <span class="mod-sub">按你正在做的项目类型，自动匹配库里同类优秀案例</span></h3>
+        <div class="mod-row" style="margin-bottom:12px;">
+          <select class="mod-input" id="caseSuggestType" style="max-width:180px;" onchange="genCaseSuggest()">
+            <option value="">按类型筛选</option>
+            <option>团建拓展</option><option>职工运动会</option><option>年会庆典</option>
+            <option>品牌发布会</option><option>文旅赛事</option><option>党建活动</option>
+            <option>城市节庆</option><option>其他</option>
+          </select>
+          <input class="mod-input" id="caseSuggestKw" placeholder="或输入：我正在做______（自由描述）" oninput="genCaseSuggest()" />
+          <button class="btn-mod primary" onclick="genCaseSuggest()">✨ 生成推荐</button>
+        </div>
+        <div class="case-grid" id="caseSuggest"></div>
+      </div>
+
+      <!-- ④ 灵感早报 -->
+      <div class="mod-section">
+        <h3>🌅 灵感早报 <span class="mod-sub">从你的案例库自动汇总，每天给自己一点输入</span></h3>
+        <div class="mod-row" style="margin-bottom:12px;">
+          <button class="btn-mod primary" onclick="genCaseBrief()">📰 生成今日灵感早报</button>
+        </div>
+        <div id="caseBrief"></div>
+      </div>
+
+    </div>
+  </div>

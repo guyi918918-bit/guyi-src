@@ -1,0 +1,127 @@
+  <!-- ===== 情报搜集（招标信息 · 自动更新 · 双窗口） ===== -->
+  <section class="panel" id="panel-dash">
+    <div class="dash-head">
+      <div class="dash-title">🛰️ 情报搜集 <small>系统自动更新 · 招标信息</small></div>
+      <div class="dash-tools">
+        <span class="dash-status"><span class="dash-dot" id="dashDot"></span><span id="dashUpdated">加载中…</span></span>
+        <button class="dash-btn" id="dashRefresh">↻ 立即刷新</button>
+      </div>
+    </div>
+
+    <div class="cfg-box" id="intelCfgWrap">
+      <div class="cfg-head">
+        <span>⚙ 检索设置（设置后自动筛选本页；每日自动任务按此范围抓取新情报）</span>
+        <button class="cfg-toggle" id="intelCfgToggle">展开 / 收起</button>
+      </div>
+      <div class="cfg-body" id="intelCfgBox">
+        <div class="cfg-row">
+          <label>覆盖省份（四川为主，云贵渝陕为辅）</label>
+          <div class="cfg-chks" id="intelRegions"></div>
+        </div>
+        <div class="cfg-row" id="intelKw"></div>
+        <div class="cfg-row">
+          <label>关键词即时筛选</label>
+          <input class="cfg-input" id="intelSearch" placeholder="输入关键词，如 职工运动会 / 嘉年华 / 婚礼" />
+        </div>
+        <div class="cfg-actions">
+          <button class="dash-btn" id="intelSave">💾 保存设置</button>
+          <span class="cfg-hint" id="intelSaved"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-stats" id="dashStats">
+      <div class="dash-stat"><b id="statTenders">–</b><span>🛰️ 招标信息（条）</span></div>
+      <div class="dash-stat"><b id="statProv">–</b><span>覆盖省份</span></div>
+      <div class="dash-stat"><b id="statNew">–</b><span>检索词条（组）</span></div>
+    </div>
+
+    <!-- 双窗口 + 检索入口：最近一个月 / 往年同时段 / 检索入口（切换，不并列） -->
+    <div class="sub-bar" id="dashSubBar">
+      <button class="sub-tab" data-win="recent">📅 最近一个月情报</button>
+      <button class="sub-tab active" data-win="season">🗓️ 往年同时段（季节窗口）</button>
+      <button class="sub-tab" data-win="links">🔗 检索入口（自搜）</button>
+    </div>
+
+    <div class="dash-filters" id="dashFilters">
+      <div class="filter-row">
+        <label>公告类型</label>
+        <select id="intelNotice" class="filter-sel">
+          <option value="全部">全部</option>
+          <option value="提前项目">提前项目（拟建/采购意向/预告）</option>
+          <option value="采购公告">采购公告</option>
+          <option value="招标">招标（邀标/询价/竞谈/竞磋/竞价）</option>
+          <option value="采购结果">采购结果（开标/中标成交/终止/合同）</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <label>来源行业</label>
+        <select id="intelSector" class="filter-sel">
+          <option value="全部">全部行业</option>
+          <option value="工会/群团">工会 / 群团</option>
+          <option value="国有企业">国有企业</option>
+          <option value="金融银行">金融 / 银行</option>
+          <option value="医疗行业">医疗行业</option>
+          <option value="事业单位-教育">事业单位 / 教育</option>
+          <option value="高新技术">高新技术</option>
+          <option value="政府部门">政府部门</option>
+          <option value="其他企事业单位">其他企事业单位</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <label>时间范围</label>
+        <select id="intelTimeRange" class="filter-sel">
+          <option value="default">跟随窗口（近1月 / 往年同时段）</option>
+          <option value="7d">近 7 天</option>
+          <option value="30d">近 30 天</option>
+          <option value="90d">近 90 天</option>
+          <option value="180d">近 180 天</option>
+          <option value="1y">近 1 年</option>
+          <option value="all">全部时间</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <label>时间排序</label>
+        <select id="intelSort" class="filter-sel">
+          <option value="date-desc">最新优先</option>
+          <option value="date-asc">最远优先</option>
+          <option value="default">默认排序</option>
+        </select>
+      </div>
+      <div class="dash-chips" id="dashChips">
+        <span class="dash-chip active" data-r="all">全部省份</span>
+        <span class="dash-chip" data-r="四川">四川</span>
+        <span class="dash-chip" data-r="云南">云南</span>
+        <span class="dash-chip" data-r="贵州">贵州</span>
+        <span class="dash-chip" data-r="重庆">重庆</span>
+        <span class="dash-chip" data-r="陕西">陕西</span>
+      </div>
+    </div>
+
+    <div class="dash-section" id="tendersSection">
+      <h3>🛰️ 招标信息 <span class="n" id="nTenders">0</span> <small class="win-label" id="intelWinLabel"></small></h3>
+      <div class="dash-grid" id="gridTenders"></div>
+    </div>
+
+    <!-- 检索入口（自搜）：分地区整理，点击即前往自行搜寻；上方按钮可新增 / 批量删除 -->
+    <div class="dash-section" id="linksSection" style="display:none;">
+      <div class="win-toolbar">
+        <h3>🔗 检索入口（自搜） <span class="n" id="nLinks">0</span> <small class="win-label">分地区整理 · 点击链接自行搜寻</small></h3>
+        <div class="win-actions">
+          <button class="dash-btn" id="lkAddBtn">➕ 新增检索</button>
+          <button class="dash-btn warn" id="lkBatchBtn">🗑️ 批量删除</button>
+        </div>
+      </div>
+      <div class="link-add" id="lkAddForm" style="display:none;">
+        <select class="cfg-input" id="lk-region-sel" style="max-width:200px;"></select>
+        <input class="cfg-input" id="lk-region-new" placeholder="新分组名称，如 四川·市级" style="max-width:200px;display:none;" />
+        <input class="cfg-input" id="lk-name" placeholder="平台名称" style="max-width:240px;" />
+        <input class="cfg-input" id="lk-url" placeholder="https://..." style="flex:1;min-width:220px;" />
+        <button class="dash-btn" id="lk-save">💾 保存</button>
+        <button class="dash-btn" id="lk-cancel">取消</button>
+      </div>
+      <div class="link-list-wrap" id="intelLinks"></div>
+    </div>
+
+    <div class="dash-foot" id="dashFoot">数据来源不限于省级/市级活动：涵盖国有企业、金融银行、医疗行业、高新技术、事业单位与政府部门；渠道含政府采购网、中国政府采购网、各省总工会/工会官网、各企事业单位官网、微信公众号、招标代理机构挂网等公开信息。按「公告类型 + 来源行业 + 省份 + 时间窗口」多维筛选；系统每周自动补充，设置地区/关键词可即时筛选本页。</div>
+  </section>

@@ -1,0 +1,105 @@
+  <!-- ===== 灵感早报（同行优秀案例 · 自动更新 · 双窗口 + 活动日历） ===== -->
+  <section class="panel" id="panel-inspire">
+    <div class="dash-head">
+      <div class="dash-title">💡 灵感早报 <small>系统自动更新 · 同行优秀案例</small></div>
+      <div class="dash-tools">
+        <span class="dash-status"><span class="dash-dot" id="insDot"></span><span id="insUpdated">加载中…</span></span>
+        <button class="dash-btn" id="insRefresh">↻ 立即刷新</button>
+      </div>
+    </div>
+
+    <div class="cfg-box">
+      <div class="cfg-head">
+        <span>⚙ 检索设置（地区 / 来源平台 / 关键词，自动筛选本页）</span>
+        <button class="cfg-toggle" id="insCfgToggle">展开 / 收起</button>
+      </div>
+      <div class="cfg-body" id="insCfgBox" style="display:none;">
+        <div class="cfg-row">
+          <label>覆盖地区（不限四川，全国均可）</label>
+          <div class="cfg-chks" id="insRegions"></div>
+        </div>
+        <div class="cfg-row">
+          <label>来源平台</label>
+          <div class="cfg-chks" id="insSources"></div>
+        </div>
+        <div class="cfg-row">
+          <label>关键词即时筛选</label>
+          <input class="cfg-input" id="insSearch" placeholder="如 市集 / 嘉年华 / 厂区文化 / 婚恋" />
+        </div>
+        <div class="cfg-actions">
+          <button class="dash-btn" id="insSave">💾 保存设置</button>
+          <span class="cfg-hint" id="insSaved"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-stats">
+      <div class="dash-stat"><b id="statCases">–</b><span>💡 案例（条）</span></div>
+      <div class="dash-stat"><b id="statSrc">–</b><span>来源平台</span></div>
+      <div class="dash-stat"><b id="statProv2">–</b><span>覆盖地区</span></div>
+    </div>
+
+    <!-- 双窗口 + 活动日历 + 创意入口：最近三个月 / 往年同时段 / 活动日历 / 创意入口 -->
+    <div class="sub-bar" id="insSubBar">
+      <button class="sub-tab" data-win="recent">📅 最近三个月情报</button>
+      <button class="sub-tab active" data-win="season">🗓️ 往年同时段（季节窗口）</button>
+      <button class="sub-tab" data-win="calendar">📆 活动日历</button>
+      <button class="sub-tab" data-win="links">💡 创意入口（策划库）</button>
+    </div>
+
+    <div class="dash-section" id="insListSection">
+      <h3>💡 同行优秀策划案例 <span class="n" id="nCases">0</span> <small class="win-label" id="insWinLabel"></small></h3>
+      <div class="filter-bar" id="inspFilters">
+        <div class="filter-row">
+          <label>时间范围</label>
+          <select id="inspTimeRange" class="filter-sel">
+            <option value="default">跟随窗口（近3月 / 往年同时段）</option>
+            <option value="7d">近 7 天</option>
+            <option value="30d">近 30 天</option>
+            <option value="90d">近 90 天</option>
+            <option value="180d">近 180 天</option>
+            <option value="1y">近 1 年</option>
+            <option value="all">全部时间</option>
+          </select>
+        </div>
+        <div class="filter-row">
+          <label>时间排序</label>
+          <select id="inspSort" class="filter-sel">
+            <option value="date-desc">最新优先</option>
+            <option value="date-asc">最远优先</option>
+            <option value="default">默认排序</option>
+          </select>
+        </div>
+      </div>
+      <div class="dash-grid" id="gridCases"></div>
+    </div>
+
+    <!-- 创意入口（策划库）：活动策划/行业资讯/设计灵感/文案工具/素材等可点击链接 -->
+    <div class="dash-section" id="inspLinksSection" style="display:none;">
+      <div class="win-toolbar">
+        <h3>💡 创意入口（策划库） <span class="n" id="nInspLinks">0</span> <small class="win-label">策划人常用网站 · 点击跳转</small></h3>
+        <div class="win-actions">
+          <button class="dash-btn" id="inspLkAddBtn">➕ 新增链接</button>
+          <button class="dash-btn warn" id="inspLkBatchBtn">🗑️ 批量删除</button>
+        </div>
+      </div>
+      <div class="link-add" id="inspLkAddForm" style="display:none;">
+        <select class="cfg-input" id="inspLk-region-sel" style="max-width:200px;"></select>
+        <input class="cfg-input" id="inspLk-region-new" placeholder="新分组名称，如 视频素材" style="max-width:200px;display:none;" />
+        <input class="cfg-input" id="inspLk-name" placeholder="网站名称" style="max-width:240px;" />
+        <input class="cfg-input" id="inspLk-url" placeholder="https://..." style="flex:1;min-width:220px;" />
+        <button class="dash-btn" id="inspLk-save">💾 保存</button>
+        <button class="dash-btn" id="inspLk-cancel">取消</button>
+      </div>
+      <div class="link-list-wrap" id="inspLinks"></div>
+    </div>
+
+    <div class="dash-section" id="calSection" style="display:none;">
+      <h3>📆 活动日历 · 抓活动时间助手</h3>
+      <p class="cal-tip">点击月份查看该月关键活动节点（节日 / 行业主题日 / 易办活动），辅助你提前 1–2 个月布局策划。标 ⭐ 为当前季节窗口月份。</p>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-detail" id="calDetail"><span class="dash-empty">← 选择上方月份查看活动节点</span></div>
+    </div>
+
+    <div class="dash-foot" id="insFoot">案例来源：花瓣网 / 活动方案网 / 小红书 / 微信公众号 / 抖音 / 官网 / 今日头条 等全国公开网页，覆盖多省份。按「时间窗口（最近三个月 / 往年同时段）+ 地区 + 来源 + 关键词」筛选；系统每日自动补充。「活动日历」为固定策划参考，帮助把握端午划龙舟、七夕联谊、中秋、医师节、6月安全生产月技能大赛、年会、春节前游园会等关键时间点。</div>
+  </section>

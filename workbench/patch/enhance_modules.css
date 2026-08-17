@@ -1,0 +1,132 @@
+/* ===================== 升级模块：商机雷达 + 案例智库 ===================== */
+/* 沿用原版 CSS 变量（--header-bg #0F4C81 等），风格保持一致 */
+
+.mod-wrap { display: flex; flex-direction: column; gap: 18px; max-width: 1100px; margin: 0 auto; }
+.mod-section {
+  background: var(--bg-panel); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow);
+}
+.mod-section > h3 {
+  margin: 0 0 14px; font-size: 16px; display: flex; align-items: center; gap: 8px;
+  color: var(--header-bg); border-left: 4px solid var(--header-bg); padding-left: 10px;
+}
+.mod-sub { font-size: 12px; color: #6b7280; font-weight: 400; margin-left: 6px; }
+.mod-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mod-row.tight { gap: 6px; }
+.mod-input {
+  flex: 1; min-width: 160px; padding: 8px 10px; border: 1px solid var(--input-border);
+  border-radius: 8px; font-size: 14px; background: var(--input-bg); color: var(--text-color);
+}
+.mod-input:focus { outline: 2px solid var(--header-bg); outline-offset: -1px; }
+
+/* 来源深搜卡片 */
+.source-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.source-card {
+  border: 1px solid var(--border-color); border-radius: 10px; padding: 12px;
+  background: #fbfdff; display: flex; flex-direction: column; gap: 8px;
+}
+.source-card .sc-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.source-card .sc-name { font-weight: 600; font-size: 14px; color: #1f2937; }
+.src-badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+.src-badge.gov { background: #e0f2fe; color: #0369a1; }
+.src-badge.agg { background: #fef3c7; color: #b45309; }
+.src-badge.case { background: #ede9fe; color: #6d28d9; }
+.source-card .sc-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+.source-card .sc-kw { font-size: 12px; color: #374151; }
+.source-card .sc-actions { display: flex; gap: 6px; margin-top: auto; }
+
+/* 关键词库 */
+.kw-area {
+  width: 100%; min-height: 120px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.7; padding: 10px 12px; border: 1px solid var(--input-border);
+  border-radius: 8px; resize: vertical; background: var(--input-bg); color: var(--text-color);
+}
+.kw-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.kw-chip {
+  font-size: 12px; padding: 4px 10px; border-radius: 20px; background: var(--card-bg);
+  border: 1px solid var(--card-border); color: var(--header-bg); cursor: pointer; user-select: none;
+}
+.kw-chip:hover { background: var(--header-bg); color: #fff; }
+
+/* 巡检清单 */
+.check-list { display: flex; flex-direction: column; gap: 8px; }
+.check-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border-color);
+  border-radius: 8px; background: #fff;
+}
+.check-item.done { background: #f0fdf4; border-color: #bbf7d0; }
+.check-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--btn-save); }
+.check-item .ci-name { font-weight: 500; }
+.check-item .ci-hint { font-size: 12px; color: #6b7280; margin-left: auto; }
+.check-progress { font-size: 13px; color: #374151; margin-bottom: 10px; }
+.check-progress b { color: var(--btn-save); }
+
+/* 台账表格 */
+.ledger-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ledger-table th, .ledger-table td { border: 1px solid var(--border-color); padding: 7px 9px; text-align: left; }
+.ledger-table th { background: #f1f5f9; color: #334155; font-weight: 600; position: sticky; top: 0; }
+.ledger-table tr:nth-child(even) { background: #fafafa; }
+.ledger-table .lk-unit { font-weight: 600; color: var(--header-bg); }
+.ledger-table .lk-link a { color: var(--btn-refresh); text-decoration: none; }
+.ledger-table .lk-link a:hover { text-decoration: underline; }
+.lk-tag { font-size: 11px; padding: 1px 7px; border-radius: 4px; background: #e0f2fe; color: #0369a1; }
+.lk-status { font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.st-wait { background: #fef3c7; color: #b45309; }
+.st-doing { background: #dbeafe; color: #1d4ed8; }
+.st-bid { background: #ede9fe; color: #6d28d9; }
+.st-win { background: #dcfce7; color: #15803d; }
+.st-lose { background: #fee2e2; color: #b91c1c; }
+.st-drop { background: #e5e7eb; color: #6b7280; }
+.row-act { white-space: nowrap; }
+.icon-btn { border: none; background: transparent; cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 6px; }
+.icon-btn:hover { background: #eef2f7; }
+
+/* 客户采购画像 */
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.profile-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; background: #fff; }
+.profile-card .pc-name { font-weight: 700; color: var(--header-bg); font-size: 15px; cursor: pointer; }
+.profile-card .pc-meta { font-size: 12px; color: #6b7280; margin: 6px 0; }
+.profile-card .pc-types { display: flex; flex-wrap: wrap; gap: 4px; }
+.profile-card .pc-bar { height: 6px; border-radius: 4px; background: #e0f2fe; margin-top: 8px; overflow: hidden; }
+.profile-card .pc-bar > span { display: block; height: 100%; background: var(--btn-save); }
+.empty-tip { color: #9ca3af; font-size: 13px; padding: 16px; text-align: center; border: 1px dashed var(--border-color); border-radius: 8px; }
+
+/* 案例库卡片 */
+.case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.case-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+.case-card .cc-title { font-weight: 600; color: #1f2937; font-size: 14px; line-height: 1.4; }
+.case-card .cc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.case-card .cc-note { font-size: 12px; color: #4b5563; line-height: 1.6; }
+.case-card .cc-actions { display: flex; gap: 8px; margin-top: auto; font-size: 12px; }
+.case-card a.cc-link { color: var(--btn-refresh); text-decoration: none; }
+.cc-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #ede9fe; color: #6d28d9; }
+.cc-tag.ind { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #fce7f3; color: #be185d; }
+.cc-tag.bud { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dcfce7; color: #15803d; }
+
+/* 灵感早报 */
+.brief-box { background: linear-gradient(135deg, #eff6ff, #f0fdf4); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; }
+.brief-box h4 { margin: 0 0 8px; color: var(--header-bg); }
+.brief-box ul { margin: 8px 0 0; padding-left: 18px; line-height: 1.9; font-size: 14px; }
+.brief-bar { display: flex; gap: 4px; align-items: flex-end; height: 70px; margin: 10px 0; }
+.brief-bar .bb { flex: 1; background: var(--header-bg); border-radius: 4px 4px 0 0; position: relative; min-width: 14px; }
+.brief-bar .bb span { position: absolute; bottom: -18px; left: 0; right: 0; text-align: center; font-size: 11px; color: #6b7280; }
+.brief-pick { font-size: 13px; color: #334155; background: #fff; border-left: 3px solid var(--btn-save); padding: 8px 12px; border-radius: 6px; margin-top: 6px; }
+
+/* 通用小按钮（模块内） */
+.btn-mod { padding: 7px 14px; border: 1px solid var(--input-border); border-radius: 8px; background: #fff; color: #1f2937; cursor: pointer; font-size: 13px; }
+.btn-mod:hover { border-color: var(--header-bg); color: var(--header-bg); }
+.btn-mod.primary { background: var(--header-bg); color: #fff; border-color: var(--header-bg); }
+.btn-mod.primary:hover { opacity: 0.9; color: #fff; }
+.btn-mod.go { background: var(--btn-save); color: #fff; border-color: var(--btn-save); }
+.btn-mod.go:hover { opacity: 0.9; color: #fff; }
+
+/* 移动端：深搜卡片与表格横向滚动 */
+@media (max-width: 768px) {
+  .mod-wrap { gap: 12px; }
+  .mod-section { padding: 14px; }
+  .source-grid { grid-template-columns: 1fr; }
+  .case-grid, .profile-grid { grid-template-columns: 1fr; }
+  .ledger-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ledger-table { min-width: 760px; }
+}

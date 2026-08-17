@@ -1,0 +1,18 @@
+# 构建产物（部署在 guyi 仓库的 gh-pages 内容由此生成）
+workbench/dist/
+
+# 依赖（符号链接，指向隔离环境 node_modules）
+workbench/node_modules
+
+# 数据/文件备份
+*.bak
+*.bak-*
+
+# 本地调试脚本与一次性数据抓取工具
+*.dbg.mjs
+workbench/serve/
+workbench/build_feed.py
+workbench/merge_*.py
+
+# 系统文件
+.DS_Store

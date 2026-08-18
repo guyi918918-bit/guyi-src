@@ -628,14 +628,31 @@
       visibility: hidden; opacity: 0;
       position: absolute; bottom: 135%; left: 50%;
       transform: translateX(-50%);
-      width: max-content; max-width: 340px;
+      width: max-content; min-width: 220px; max-width: 340px;
       background: #1d1d1f; color: #fff;
-      font-size: 12px; font-weight: 400; line-height: 1.6;
-      text-align: left; padding: 9px 11px; border-radius: 9px;
-      box-shadow: 0 6px 22px rgba(0, 0, 0, .28);
+      font-size: 12px; font-weight: 400;
+      text-align: left; padding: 12px 14px; border-radius: 12px;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, .30);
       z-index: 10000; transition: opacity .15s ease;
       pointer-events: none;
     }
+    .info-icon .tooltip .tt-title {
+      display: block; font-weight: 700; font-size: 12px;
+      margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, .18);
+      letter-spacing: .3px;
+    }
+    .info-icon .tooltip .tt-row {
+      display: flex; align-items: baseline; gap: 8px;
+      line-height: 1.8; white-space: normal;
+    }
+    .info-icon .tooltip .tt-k {
+      flex: 0 0 auto; min-width: 22px; text-align: center;
+      font-weight: 700; color: #8fd0ff;
+      background: rgba(143, 208, 255, .14);
+      border-radius: 5px; padding: 1px 5px; line-height: 1.5;
+    }
+    .info-icon .tooltip .tt-d { flex: 1 1 auto; color: #f2f2f2; }
     .info-icon:hover .tooltip,
     .info-icon:focus .tooltip,
     .info-icon:focus-within .tooltip { visibility: visible; opacity: 1; }

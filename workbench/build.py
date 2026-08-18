@@ -111,6 +111,15 @@ def main():
     if "./xlsx.full.min.js" not in src:
         sys.exit("[FAIL] xlsx 本地化替换失败")
 
+    # ---------- 1.5) 注入 APP_VERSION（供内置版本更新检查比对） ----------
+    app_ts = int(time.time())
+    src = insert_after(
+        src,
+        '  <link rel="manifest" href="./manifest.webmanifest" />\n',
+        '  <script>window.APP_VERSION = "build@%d";</script>\n' % app_ts,
+        "app version",
+    )
+
     # ---------- 2) 增强样式：五大板块 + 同步 ----------
     src = insert_before(src, "  </style>\n</head>", read(PATCH / "dash.css"), "dash style")
     src = insert_before(src, "  </style>\n</head>", read(PATCH / "enhance.css"), "sync style")
@@ -194,6 +203,12 @@ def main():
         shutil.copy(ROOT / "icon-192.png", ROOT / "dist" / "icon-192.png")
     if (ROOT / "icon-512.png").exists():
         shutil.copy(ROOT / "icon-512.png", ROOT / "dist" / "icon-512.png")
+
+    # ---------- 10) 版本清单：供内置「检查更新」比对 ----------
+    version_info = {"version": "build@%d" % app_ts, "time": time.strftime("%Y-%m-%d %H:%M:%S")}
+    (ROOT / "dist" / "version.json").write_text(
+        json.dumps(version_info, ensure_ascii=False, indent=2), encoding="utf-8")
+    print("[OK] 输出 %s" % (ROOT / "dist" / "version.json"))
 
     print("[OK] 输出 %s" % OUT)
     print("[OK] 输出 %s" % (ROOT / "dist" / "sw.js"))

@@ -458,4 +458,37 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initExtra);
   else initExtra();
+
+  /* ====================== [V4] 内置版本更新检查 ====================== */
+  (function () {
+    function showUpdateBanner() {
+      if (document.getElementById('app-update-banner')) return;
+      var b = document.createElement('div');
+      b.id = 'app-update-banner';
+      b.className = 'app-update-banner';
+      b.innerHTML = '🎉 发现新版本（含新功能），<a href="javascript:void(0)" onclick="appDoUpdate()">点击刷新</a>';
+      document.body.appendChild(b);
+    }
+    window.appDoUpdate = function () {
+      try { location.reload(true); } catch (e) { location.reload(); }
+    };
+    window.checkAppUpdate = function () {
+      try {
+        var url = new URL('version.json', location.href);
+        url.searchParams.set('_', String(Date.now()));
+        fetch(url.toString(), { cache: 'no-store' }).then(function (r) {
+          if (!r.ok) return null;
+          return r.json();
+        }).then(function (data) {
+          if (data && data.version && window.APP_VERSION && data.version !== window.APP_VERSION) {
+            showUpdateBanner();
+          }
+        }).catch(function () {});
+      } catch (e) {}
+    };
+    window.addEventListener('load', function () {
+      setTimeout(window.checkAppUpdate, 3000);
+      setInterval(window.checkAppUpdate, 5 * 60 * 1000);
+    });
+  })();
 })();

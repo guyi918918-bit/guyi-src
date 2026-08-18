@@ -613,3 +613,44 @@
     .client-detail { display: none; margin-top: 4px; font-size: 13px; color: var(--ui-text-soft, #6e6e73); }
     .client-detail > div { margin: 1px 0; }
     .client-item.expanded .client-detail { display: block; }
+
+    /* [V4] ⓘ 字段说明气泡 */
+    .info-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 15px; height: 15px; margin-left: 5px;
+      font-size: 10px; font-style: normal; line-height: 1;
+      color: var(--ui-primary, #0066cc);
+      background: rgba(0, 102, 204, .12);
+      border-radius: 50%; cursor: help; user-select: none;
+      position: relative; vertical-align: middle;
+    }
+    .info-icon .tooltip {
+      visibility: hidden; opacity: 0;
+      position: absolute; bottom: 135%; left: 50%;
+      transform: translateX(-50%);
+      width: max-content; max-width: 340px;
+      background: #1d1d1f; color: #fff;
+      font-size: 12px; font-weight: 400; line-height: 1.6;
+      text-align: left; padding: 9px 11px; border-radius: 9px;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, .28);
+      z-index: 10000; transition: opacity .15s ease;
+      pointer-events: none;
+    }
+    .info-icon:hover .tooltip,
+    .info-icon:focus .tooltip,
+    .info-icon:focus-within .tooltip { visibility: visible; opacity: 1; }
+
+    /* [V4] 新版本提示条 */
+    .app-update-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: linear-gradient(90deg, #0066cc, #00b894);
+      color: #fff; text-align: center;
+      padding: 9px 16px; font-size: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+      animation: appBannerIn .25s ease;
+    }
+    .app-update-banner a { color: #fff; font-weight: 700; text-decoration: underline; cursor: pointer; }
+    @keyframes appBannerIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+    @media (prefers-color-scheme: dark) {
+      .info-icon { color: #4aa3ff; background: rgba(74, 163, 255, .16); }
+    }

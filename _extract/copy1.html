@@ -1922,6 +1922,7 @@
         <option value="level">级别</option>
         <option value="importance">重要程度</option>
         <option value="closeness">紧密程度</option>
+        <option value="recent">近期有活动</option>
       </select>
       <label>级别 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">客户级别编码</span><span class="tt-row"><span class="tt-k">43</span><span class="tt-d">利润 ＞ 20 万</span></span><span class="tt-row"><span class="tt-k">42</span><span class="tt-d">利润 10–20 万</span></span><span class="tt-row"><span class="tt-k">41</span><span class="tt-d">利润 5–10 万</span></span><span class="tt-row"><span class="tt-k">40</span><span class="tt-d">利润 ＜ 5 万</span></span><span class="tt-row"><span class="tt-k">34</span><span class="tt-d">危机客户</span></span><span class="tt-row"><span class="tt-k">33</span><span class="tt-d">两年以上未成交老客户</span></span><span class="tt-row"><span class="tt-k">32</span><span class="tt-d">需求客户</span></span><span class="tt-row"><span class="tt-k">31</span><span class="tt-d">手微客户</span></span><span class="tt-row"><span class="tt-k">22</span><span class="tt-d">负责人客户（仅座机/负责人姓名）</span></span></span></span></label>
       <select id="client-filter-level" onchange="renderClients()">
@@ -2737,6 +2738,18 @@
       } else if (sortKey === 'closeness') {
         const order = { '高': 1, '中': 2, '低': 3, '': 4 };
         list.sort((a, b) => (order[a.closeness] || 4) - (order[b.closeness] || 4));
+      } else if (sortKey === 'recent') {
+        list.sort((a, b) => {
+          const upA = getUpcomingActivities(a);
+          const upB = getUpcomingActivities(b);
+          if (upA.length && !upB.length) return -1;
+          if (!upA.length && upB.length) return 1;
+          if (upA.length && upB.length) {
+            const diff = upA[0].month - upB[0].month;
+            if (diff !== 0) return diff;
+          }
+          return a.name.localeCompare(b.name);
+        });
       }
       const container = document.getElementById('client-list-container');
       if (!list.length) { container.innerHTML = '<div class="empty-tip">暂无客户</div>'; return; }

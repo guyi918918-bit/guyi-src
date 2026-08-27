@@ -841,11 +841,44 @@
       border-radius: 12px;
       font-weight: 500;
     }
+    .method-checks-wrap {
+      margin-bottom: 8px;
+    }
+    .method-checks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--tag-bg);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-color);
+      border: 1px solid transparent;
+      transition: 0.15s;
+      user-select: none;
+    }
+    .method-checks-header:hover {
+      border-color: var(--btn-save);
+      background: var(--step-done);
+    }
+    .method-checks-header .method-caret {
+      transition: transform 0.2s;
+      font-size: 12px;
+      color: var(--ui-text-soft);
+    }
+    .method-checks-wrap.collapsed .method-checks {
+      display: none;
+    }
+    .method-checks-wrap.collapsed .method-checks-header .method-caret {
+      transform: rotate(-90deg);
+    }
     .method-checks {
       display: flex;
       flex-direction: column;
       gap: 6px;
       margin-bottom: 8px;
+      margin-top: 6px;
     }
     .method-check {
       display: flex;
@@ -3281,12 +3314,28 @@
 
     function renderMethodCheckboxes(selected) {
       const sel = new Set(selected || []);
-      return `<div class="method-checks">${INTERACTION_METHODS.map(m => `
-        <label class="method-check">
-          <span>${m.emoji} ${m.label}</span>
-          <input type="checkbox" name="followup-method" value="${m.key}" ${sel.has(m.key) ? 'checked' : ''} />
-        </label>
-      `).join('')}</div>`;
+      return `
+        <div class="method-checks-wrap" id="methodChecksWrap">
+          <div class="method-checks-header" onclick="toggleMethodChecks()">
+            <span>互动方式（可多选）</span>
+            <span class="method-caret" id="methodCaret">▾</span>
+          </div>
+          <div class="method-checks" id="methodChecksBody">
+            ${INTERACTION_METHODS.map(m => `
+              <label class="method-check">
+                <span>${m.emoji} ${m.label}</span>
+                <input type="checkbox" name="followup-method" value="${m.key}" ${sel.has(m.key) ? 'checked' : ''} />
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleMethodChecks() {
+      const wrap = document.getElementById('methodChecksWrap');
+      if (!wrap) return;
+      wrap.classList.toggle('collapsed');
     }
 
     function editClient(name) {
@@ -3334,7 +3383,6 @@
                   </div>
                   <div class="form-col" style="flex:1;min-width:220px;">
                       <label>新增跟进</label>
-                      <label style="font-size:12px;color:var(--text-color);opacity:.7;margin-bottom:6px;display:block;">互动方式（可多选）</label>
                       ${renderMethodCheckboxes([])}
                       <textarea id="edit-followup-content" rows="2" placeholder="回复内容 / 联系摘要 / 需求或兴趣点"></textarea>
                       <button class="btn-save" style="margin-top:6px;width:100%;" onclick="addClientFollowUp()">➕ 添加跟进</button>

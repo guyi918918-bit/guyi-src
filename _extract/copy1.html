@@ -848,17 +848,23 @@
       margin-bottom: 8px;
     }
     .method-check {
+      flex: 1 1 90px;
+      min-width: 0;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 1.2;
       background: var(--tag-bg);
       color: var(--tag-color);
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 5px 8px;
+      border-radius: 8px;
       cursor: pointer;
       border: 1px solid transparent;
       transition: 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .method-check:has(input:checked) {
       background: var(--step-done);
@@ -868,6 +874,7 @@
     .method-check input {
       margin: 0;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .followup-item .followup-methods {
       display: inline-flex;
@@ -2060,7 +2067,7 @@
     </div>
     <div class="form-row">
       <div class="form-col"><label>决策人角色 <span class="red-star">*</span> <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">决策人角色</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">拍板人：工会主席/最高领导/其他，能签字付款</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">影响者：行政/HR/小领导，负责筛选供应商、汇报</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">传声筒：联系人/助理，只负责转交资料</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">待确认：还没摸清底细</span></span></span></span></label><select id="client-role"><option value="">—</option><option value="A">A｜拍板人</option><option value="B">B｜影响者</option><option value="C">C｜传声筒</option><option value="D">D｜待确认</option></select></div>
-      <div class="form-col"><label>联系人</label><input type="text" id="client-contact" placeholder="座机 / 负责人姓名" /></div>
+      <div class="form-col"><label>联系人</label><input type="text" id="client-contact" placeholder="负责人姓名" /></div>
       <div class="form-col"><label>备注</label><input type="text" id="client-remark" /></div>
     </div>
     <div class="form-row">
@@ -2812,9 +2819,9 @@
     ];
 
     const INTERACTION_THRESHOLDS = [
-      { max: 0, color: '#6b7280', emoji: '⚫', label: '今年无互动', desc: '完全沉默，需激活或放弃' },
-      { max: 5, color: '#f59e0b', emoji: '🟡', label: '偶尔互动', desc: '有联系但不紧密，需主动推进' },
-      { max: 10, color: '#22c55e', emoji: '🟢', label: '互动频繁', desc: '关系健康，正常维护即可' },
+      { max: 0, color: '#374151', emoji: '⚫', label: '今年无互动', desc: '完全沉默，需激活或放弃' },
+      { max: 5, color: '#22c55e', emoji: '🟢', label: '偶尔互动', desc: '有联系但不紧密，需主动推进' },
+      { max: 10, color: '#f59e0b', emoji: '🟡', label: '互动频繁', desc: '关系健康，正常维护即可' },
       { max: Infinity, color: '#ef4444', emoji: '🔴', label: '高频互动', desc: '核心客户，重点维护' }
     ];
 
@@ -3298,7 +3305,7 @@
               <div class="form-row">
                   <div class="form-col"><label>决策人角色 <span class="red-star">*</span> <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">决策人角色</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">拍板人：工会主席/最高领导/其他，能签字付款</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">影响者：行政/HR/小领导，负责筛选供应商、汇报</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">传声筒：联系人/助理，只负责转交资料</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">待确认：还没摸清底细</span></span></span></span></label><select id="edit-client-role"><option value="">—</option><option value="A" ${c.decisionMakerRole==='A'?'selected':''}>A｜拍板人</option><option value="B" ${c.decisionMakerRole==='B'?'selected':''}>B｜影响者</option><option value="C" ${c.decisionMakerRole==='C'?'selected':''}>C｜传声筒</option><option value="D" ${c.decisionMakerRole==='D'?'selected':''}>D｜待确认</option></select></div>
                   <div class="form-col"><label>紧密程度 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">紧密程度</span><span class="tt-row"><span class="tt-k">🔴 高</span><span class="tt-d">重点维护，频繁互动</span></span><span class="tt-row"><span class="tt-k">🟡 中</span><span class="tt-d">正常维护，定期跟进</span></span><span class="tt-row"><span class="tt-k">🟢 低</span><span class="tt-d">低频次维护</span></span><span class="tt-row"><span class="tt-k">⚫ 沉睡</span><span class="tt-d">长期无互动</span></span></span></span></label><select id="edit-client-closeness" style="color:${c.closeness ? egInfo.color : 'inherit'};border-color:${c.closeness ? egInfo.color : 'var(--input-border)'};"><option value="">—</option><option value="高" ${c.closeness==='高'?'selected':''}>🔴 高</option><option value="中" ${c.closeness==='中'?'selected':''}>🟡 中</option><option value="低" ${c.closeness==='低'?'selected':''}>🟢 低</option><option value="沉睡" ${c.closeness==='沉睡'?'selected':''}>⚫ 沉睡</option></select></div>
-                  <div class="form-col"><label>联系人</label><input type="text" id="edit-client-contact" value="${c.contact||''}" placeholder="座机 / 负责人姓名" /></div>
+                  <div class="form-col"><label>联系人</label><input type="text" id="edit-client-contact" value="${c.contact||''}" placeholder="负责人姓名" /></div>
               </div>
               <div class="form-row">
                   <div class="form-col" style="flex:2;"><label>备注</label><input type="text" id="edit-client-remark" value="${c.remark||''}" /></div>

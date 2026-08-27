@@ -79,3 +79,22 @@ select to_regclass('public.wb_kv');</div>
   </div>
 
   <div id="wbToastWrap"></div>
+
+  <!-- ===== 设置弹窗：导航排序与显示 ===== -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content" style="max-width:520px;">
+      <button class="close-btn" onclick="closeSettingsModal()">✕</button>
+      <h2>⚙️ 设置</h2>
+
+      <div class="settings-section">
+        <h3>📑 导航排序与显示（目录）</h3>
+        <p class="hint">拖拽或点击 ↑↓ 调整顶部导航顺序；取消勾选可隐藏该板块（仍可通过快捷键或设置进入）。</p>
+        <div class="nav-catalog-list" id="navCatalogList"></div>
+      </div>
+
+      <div class="btn-group" style="margin-top:18px;justify-content:flex-end;">
+        <button class="btn-reset" onclick="resetNavCatalog()">恢复默认</button>
+        <button class="btn-save" onclick="saveNavCatalog()">💾 保存设置</button>
+      </div>
+    </div>
+  </div>

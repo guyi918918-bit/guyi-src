@@ -1915,7 +1915,7 @@
       <button class="btn-del" onclick="batchDeleteClients()" style="padding:4px 16px;">🗑️ 批量删除</button>
       <span>选中后将移入回收站</span>
     </div>
-    <div class="filter-bar" style="margin-bottom:16px;">
+    <div class="filter-bar" style="margin-bottom:16px;flex-wrap:wrap;gap:10px;">
       <label>排序</label>
       <select id="client-sort" onchange="renderClients()">
         <option value="name">名称</option>
@@ -1923,7 +1923,9 @@
         <option value="importance">重要程度</option>
         <option value="closeness">紧密程度</option>
         <option value="recent">近期有活动</option>
+        <option value="followup">最近跟进优先</option>
       </select>
+      <input type="search" id="client-search" placeholder="🔍 搜索客户/联系人" oninput="renderClients()" style="min-width:150px;flex:1;max-width:260px;" />
       <label>级别 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">客户级别编码</span><span class="tt-row"><span class="tt-k">43</span><span class="tt-d">利润 ＞ 20 万</span></span><span class="tt-row"><span class="tt-k">42</span><span class="tt-d">利润 10–20 万</span></span><span class="tt-row"><span class="tt-k">41</span><span class="tt-d">利润 5–10 万</span></span><span class="tt-row"><span class="tt-k">40</span><span class="tt-d">利润 ＜ 5 万</span></span><span class="tt-row"><span class="tt-k">34</span><span class="tt-d">危机客户</span></span><span class="tt-row"><span class="tt-k">33</span><span class="tt-d">两年以上未成交老客户</span></span><span class="tt-row"><span class="tt-k">32</span><span class="tt-d">需求客户</span></span><span class="tt-row"><span class="tt-k">31</span><span class="tt-d">手微客户</span></span><span class="tt-row"><span class="tt-k">22</span><span class="tt-d">负责人客户（仅座机/负责人姓名）</span></span></span></span></label>
       <select id="client-filter-level" onchange="renderClients()">
         <option value="">全部</option>
@@ -2099,7 +2101,7 @@
 张三,43,A,高,张经理,IT,重点客户,2025-08 夏季促销;2024-09 中秋活动
 李四,42,B,中,李总,金融,,2025-10 国庆合作
         </pre>
-        <p>💡 级别为数字编码（43 利润＞20万 / 42 10–20万 / 41 5–10万 / 40 ＜5万 / 34 危机 / 33 两年以上老客 / 32 需求 / 31 手微 / 22 负责人客户）；重要程度可选 A/B/C/D/E：A 全年预估业绩≥5万｜B ≥3万｜C ≥1万｜D 曾经消费过但近2年无需求/消费｜E 放弃跟进；紧密程度可选 高/中/低；过往消费多条用分号分隔。</p>
+        <p>💡 级别为数字编码（43 利润＞20万 / 42 10–20万 / 41 5–10万 / 40 ＜5万 / 34 危机 / 33 两年以上老客 / 32 需求 / 31 手微 / 22 负责人客户）；重要程度可选 A/B/C/D/E：A 全年预估业绩≥5万｜B ≥3万｜C ≥1万｜D 曾经消费过但近2年无需求/消费｜E 放弃跟进；紧密程度可选 高/中/低；过往消费多条用分号分隔。跟进记录格式：<code>[回复 2026-08-20 10:00] 内容</code>，多条用 | 分隔。</p>
         <p>⚠️ 客户名称不可为空，若名称已存在则覆盖更新。</p>
         <button class="btn-sm" onclick="downloadClientTemplate()">📄 下载模板CSV</button>
       </div>
@@ -2653,6 +2655,31 @@
       return history.map(h => `${h.month} ${h.activity}`).join('；');
     }
 
+    function getLastFollowUpTime(client) {
+      if (!client.followUps || !client.followUps.length) return null;
+      const times = client.followUps.map(f => new Date(f.time || 0).getTime()).filter(t => !isNaN(t));
+      return times.length ? Math.max(...times) : null;
+    }
+    function getLastFollowUp(client) {
+      if (!client.followUps || !client.followUps.length) return null;
+      return client.followUps.slice().sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0))[0];
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function parseFollowUpsFromText(text) {
+      if (!text) return [];
+      const typeMap = { '回复': 'reply', '联系': 'contact', '备注': 'note' };
+      const list = [];
+      const re = /\[(回复|联系|备注)\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\]\s*([^|]*)/g;
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        list.push({ type: typeMap[m[1]] || 'note', time: m[2], content: m[3].trim() });
+      }
+      return list;
+    }
+
     function getUpcomingActivities(client) {
       if (!client.history || !client.history.length) return [];
       const now = new Date();
@@ -2726,6 +2753,10 @@
       if (levelFilter) list = list.filter(c => c.level === levelFilter);
       if (importanceFilter) list = list.filter(c => c.importance === importanceFilter);
       if (closenessFilter) list = list.filter(c => c.closeness === closenessFilter);
+      const searchVal = document.getElementById('client-search').value.trim().toLowerCase();
+      if (searchVal) {
+        list = list.filter(c => (c.name || '').toLowerCase().includes(searchVal) || (c.contact || '').toLowerCase().includes(searchVal) || (c.industry || '').toLowerCase().includes(searchVal) || (c.remark || '').toLowerCase().includes(searchVal));
+      }
       const sortKey = document.getElementById('client-sort').value;
       if (sortKey === 'name') {
         list.sort((a, b) => a.name.localeCompare(b.name));
@@ -2750,6 +2781,15 @@
           }
           return a.name.localeCompare(b.name);
         });
+      } else if (sortKey === 'followup') {
+        list.sort((a, b) => {
+          const tA = getLastFollowUpTime(a);
+          const tB = getLastFollowUpTime(b);
+          if (tA && !tB) return -1;
+          if (!tA && tB) return 1;
+          if (tA && tB) return tB - tA;
+          return a.name.localeCompare(b.name);
+        });
       }
       const container = document.getElementById('client-list-container');
       if (!list.length) { container.innerHTML = '<div class="empty-tip">暂无客户</div>'; return; }
@@ -2763,8 +2803,16 @@
         const upcomingHtml = isUrgent ?
           `<div class="upcoming-badge">🔔 预警：${upcoming.map(u => `${u.month}月（${u.activity}）`).join('、')}</div>` :
           '';
+        const lastFu = getLastFollowUp(c);
+        const hasReply = lastFu && lastFu.type === 'reply';
+        const followBadge = lastFu ?
+          `<span class="tag follow-tag ${hasReply ? 'reply' : ''}">${hasReply ? '📩 有新回复' : '📝 已跟进'}</span>` :
+          '';
+        const followHtml = lastFu ?
+          `<div class="follow-badge">${hasReply ? '📩' : '📝'} 最近${lastFu.type === 'reply' ? '回复' : lastFu.type === 'contact' ? '联系' : '跟进'}：${escapeHtml(lastFu.content || '')} <span class="follow-time">${lastFu.time || ''}</span></div>` :
+          '';
       return `
-              <div class="client-item ${isUrgent ? 'urgent' : ''}">
+              <div class="client-item ${isUrgent ? 'urgent' : ''} ${hasReply ? 'has-reply' : ''}">
                   <input type="checkbox" class="client-select" value="${c.name}" />
                   <div class="info">
                       <div class="name client-toggle">
@@ -2773,11 +2821,13 @@
                           ${levelTag}
                           ${importanceTag}
                           ${closenessTag}
+                          ${followBadge}
                       </div>
                       <div class="client-quick">联系人：${c.contact || '-'}</div>
                       <div class="client-detail">
                           <div>行业：${c.industry || '-'} ｜ 备注：${c.remark || '-'}</div>
                           <div class="history-item">📋 过往消费：${historyStr}</div>
+                          ${followHtml}
                       </div>
                       ${upcomingHtml}
                   </div>
@@ -2803,7 +2853,8 @@
         '联系人': c.contact || '',
         '行业': c.industry || '',
         '备注': c.remark || '',
-        '过往消费': (c.history || []).map(h => `${h.month} ${h.activity}`).join('; ')
+        '过往消费': (c.history || []).map(h => `${h.month} ${h.activity}`).join('; '),
+        '跟进记录': (c.followUps || []).map(f => `[${f.type === 'reply' ? '回复' : f.type === 'contact' ? '联系' : '备注'} ${f.time}] ${f.content}`).join(' | ')
       }));
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(data);
@@ -2823,12 +2874,12 @@
     }
 
     function downloadClientTemplate() {
-      const template = `客户名称,级别,重要程度,紧密程度,联系人,行业,备注,过往消费(分号分隔)
-张三,43,A,高,张经理,IT,重点客户,2025-08 夏季促销;2024-09 中秋活动
-李四,42,B,中,李总,金融,,2025-10 国庆合作
-王五,41,C,低,王主管,教育,,2025-11 校庆活动
-赵六,40,D,低,赵主任,零售,近2年无需求,
-孙七,34,E,低,孙经理,制造,放弃跟进,`;
+      const template = `客户名称,级别,重要程度,紧密程度,联系人,行业,备注,过往消费(分号分隔),跟进记录
+张三,43,A,高,张经理,IT,重点客户,2025-08 夏季促销;2024-09 中秋活动,[回复 2026-08-20 10:00] 对运动会项目感兴趣
+李四,42,B,中,李总,金融,,2025-10 国庆合作,
+王五,41,C,低,王主管,教育,,2025-11 校庆活动,
+赵六,40,D,低,赵主任,零售,近2年无需求,,
+孙七,34,E,低,孙经理,制造,放弃跟进,,`;
       const blob = new Blob(['\uFEFF' + template], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -2856,6 +2907,7 @@
       const industryIdx = headers.findIndex(h => h.includes('行业'));
       const remarkIdx = headers.findIndex(h => h.includes('备注'));
       const historyIdx = headers.findIndex(h => h.includes('过往消费'));
+      const followUpsIdx = headers.findIndex(h => h.includes('跟进记录'));
       let added = 0,
         updated = 0;
       const clients = getClients();
@@ -2879,6 +2931,8 @@
           }
           return null;
         }).filter(h => h) : [];
+        const followUpsStr = followUpsIdx >= 0 ? cols[followUpsIdx] : '';
+        const followUps = followUpsStr ? parseFollowUpsFromText(followUpsStr) : undefined;
         const existing = clients.find(c => c.name === name);
         if (existing) {
           existing.level = level;
@@ -2888,6 +2942,7 @@
           existing.industry = industry;
           existing.remark = remark;
           existing.history = history;
+          if (followUps !== undefined) existing.followUps = followUps;
           updated++;
         } else {
           clients.push({
@@ -2898,7 +2953,8 @@
             contact,
             industry,
             remark,
-            history
+            history,
+            followUps: followUps || []
           });
           added++;
         }
@@ -2926,7 +2982,8 @@
         contact: document.getElementById('client-contact').value.trim(),
         industry: document.getElementById('client-industry').value.trim(),
         remark: document.getElementById('client-remark').value.trim(),
-        history: history
+        history: history,
+        followUps: []
       });
       setClients(list);
       document.getElementById('client-name').value = '';
@@ -2984,6 +3041,31 @@
                       <textarea id="edit-client-history" rows="3">${historyStr}</textarea>
                   </div>
               </div>
+              <div class="form-row" style="align-items:flex-start;">
+                  <div class="form-col" style="flex:2;">
+                      <label>📋 跟进记录（最新的会显示在客户卡上）</label>
+                      <div class="followup-list" id="edit-client-followups">
+                          ${(c.followUps || []).slice().sort((a,b)=>new Date(b.time||0)-new Date(a.time||0)).map((f, i) => `
+                            <div class="followup-item" data-idx="${i}">
+                              <span class="followup-type ${f.type || 'note'}">${f.type === 'reply' ? '客户回复' : f.type === 'contact' ? '我联系TA' : '备注记录'}</span>
+                              <span class="followup-time">${f.time || ''}</span>
+                              <span class="followup-content">${escapeHtml(f.content || '')}</span>
+                              <span class="followup-del" onclick="deleteClientFollowUp(${i})" title="删除">✖</span>
+                            </div>
+                          `).join('') || '<div class="empty-tip" style="padding:8px 0;">暂无跟进记录</div>'}
+                      </div>
+                  </div>
+                  <div class="form-col" style="flex:1;min-width:180px;">
+                      <label>新增跟进</label>
+                      <select id="edit-followup-type" style="margin-bottom:6px;">
+                          <option value="reply">📩 客户回复</option>
+                          <option value="contact">📞 我联系TA</option>
+                          <option value="note">📝 备注记录</option>
+                      </select>
+                      <textarea id="edit-followup-content" rows="2" placeholder="回复内容 / 联系摘要 / 需求或兴趣点"></textarea>
+                      <button class="btn-save" style="margin-top:6px;width:100%;" onclick="addClientFollowUp()">➕ 添加跟进</button>
+                  </div>
+              </div>
           `;
       document.getElementById('clientEditModal').classList.add('active');
     }
@@ -3009,6 +3091,32 @@
       renderClients();
       closeClientEditModal();
       alert('✅ 客户已更新');
+    }
+
+    function addClientFollowUp() {
+      const list = getClients();
+      const c = list.find(item => item.name === editClientName);
+      if (!c) return;
+      const type = document.getElementById('edit-followup-type').value;
+      const content = document.getElementById('edit-followup-content').value.trim();
+      if (!content) { alert('请输入跟进内容'); return; }
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      if (!c.followUps) c.followUps = [];
+      c.followUps.push({ type, content, time: timeStr });
+      setClients(list);
+      editClient(editClientName);
+      renderClients();
+    }
+    function deleteClientFollowUp(idx) {
+      const list = getClients();
+      const c = list.find(item => item.name === editClientName);
+      if (!c || !c.followUps || !c.followUps[idx]) return;
+      if (!confirm('确认删除这条跟进记录？')) return;
+      c.followUps.splice(idx, 1);
+      setClients(list);
+      editClient(editClientName);
+      renderClients();
     }
 
     function closeClientEditModal() {

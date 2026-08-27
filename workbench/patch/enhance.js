@@ -21,7 +21,8 @@
         'sport_recycle_bin', 'sport_todos', DRAFT_KEY,
         'wb_radar', 'wb_radar_kw', 'wb_radar_check', 'wb_cases',
         'wb_intel_links', 'wb_intel_link_order',
-        'wb_insp_links', 'wb_insp_link_order'
+        'wb_insp_links', 'wb_insp_link_order',
+        'wb_nav_catalog'
       ];
 
       function $(id) { return document.getElementById(id); }
@@ -1260,6 +1261,131 @@
         if (sel) sel.click();
       }
 
+      /* ============================================================
+       * [V5] 设置：导航排序与显示（目录）
+       * ============================================================ */
+      var DEFAULT_NAV = [
+        { id: 'dash', label: '🛰️ 情报搜集', visible: true },
+        { id: 'inspire', label: '💡 灵感早报', visible: true },
+        { id: 'work', label: '🗓️ 日常工作', visible: true },
+        { id: 'projects', label: '📌 项目管理', visible: true },
+        { id: 'clients', label: '👥 客户管理', visible: true },
+        { id: 'recycle', label: '🗑️ 回收站', visible: true }
+      ];
+      var NAV_CATALOG_KEY = 'wb_nav_catalog';
+
+      function getDefaultNavCatalog() { return JSON.parse(JSON.stringify(DEFAULT_NAV)); }
+      function getNavCatalog() {
+        try {
+          var raw = localStorage.getItem(NAV_CATALOG_KEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length) return parsed;
+          }
+        } catch (e) {}
+        return getDefaultNavCatalog();
+      }
+      function saveNavCatalogConfig(cfg) {
+        localStorage.setItem(NAV_CATALOG_KEY, JSON.stringify(cfg));
+      }
+      function applyNavOrder() {
+        var bar = document.getElementById('topNavBar');
+        if (!bar) return;
+        var cfg = getNavCatalog();
+        var buttons = Array.prototype.slice.call(bar.querySelectorAll('.top-tab'));
+        var byId = {};
+        buttons.forEach(function (b) { byId[b.dataset.tab] = b; });
+        cfg.forEach(function (item) {
+          var b = byId[item.id];
+          if (!b) return;
+          b.style.display = item.visible === false ? 'none' : '';
+          bar.appendChild(b);
+        });
+      }
+      function openSettingsModal() {
+        renderNavCatalogList();
+        document.getElementById('settingsModal').classList.add('active');
+      }
+      function closeSettingsModal() {
+        document.getElementById('settingsModal').classList.remove('active');
+      }
+      function renderNavCatalogList() {
+        var container = document.getElementById('navCatalogList');
+        if (!container) return;
+        var cfg = getNavCatalog();
+        container.innerHTML = cfg.map(function (item, i) {
+          return '<div class="nav-catalog-item" draggable="true" data-idx="' + i + '" data-id="' + item.id + '">' +
+            '<span class="drag-handle">☰</span>' +
+            '<span class="nav-icon">' + (item.label.match(/^\S+/) || [''])[0] + '</span>' +
+            '<span class="nav-label">' + item.label.replace(/^\S+\s*/, '') + '</span>' +
+            '<span class="nav-mover">' +
+              '<button onclick="moveNavItem(' + i + ', -1)" title="上移">↑</button>' +
+              '<button onclick="moveNavItem(' + i + ', 1)" title="下移">↓</button>' +
+            '</span>' +
+            '<input type="checkbox" ' + (item.visible !== false ? 'checked' : '') + ' onchange="toggleNavItemVisible(' + i + ', this.checked)" title="显示/隐藏" />' +
+          '</div>';
+        }).join('');
+        setupNavDragAndDrop();
+      }
+      function moveNavItem(idx, dir) {
+        var cfg = getNavCatalog();
+        var ni = idx + dir;
+        if (ni < 0 || ni >= cfg.length) return;
+        var tmp = cfg[idx]; cfg[idx] = cfg[ni]; cfg[ni] = tmp;
+        saveNavCatalogConfig(cfg);
+        renderNavCatalogList();
+      }
+      function toggleNavItemVisible(idx, visible) {
+        var cfg = getNavCatalog();
+        cfg[idx].visible = visible;
+        saveNavCatalogConfig(cfg);
+        applyNavOrder();
+      }
+      function saveNavCatalog() {
+        applyNavOrder();
+        closeSettingsModal();
+        toast('导航设置已保存 ✅', 'ok');
+      }
+      function resetNavCatalog() {
+        if (!confirm('恢复默认导航排序与显示？')) return;
+        saveNavCatalogConfig(getDefaultNavCatalog());
+        renderNavCatalogList();
+        applyNavOrder();
+      }
+      function setupNavDragAndDrop() {
+        var container = document.getElementById('navCatalogList');
+        if (!container) return;
+        var dragged = null;
+        container.querySelectorAll('.nav-catalog-item').forEach(function (item) {
+          item.addEventListener('dragstart', function (e) {
+            dragged = item;
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          item.addEventListener('dragend', function () {
+            item.classList.remove('dragging');
+            dragged = null;
+            var ids = Array.prototype.slice.call(container.querySelectorAll('.nav-catalog-item')).map(function (el) { return parseInt(el.dataset.idx); });
+            var cfg = getNavCatalog();
+            var reordered = ids.map(function (oldIdx) { return cfg[oldIdx]; });
+            saveNavCatalogConfig(reordered);
+            renderNavCatalogList();
+            applyNavOrder();
+          });
+          item.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (!dragged || dragged === item) return;
+            var rect = item.getBoundingClientRect();
+            var mid = rect.top + rect.height / 2;
+            if (e.clientY < mid) container.insertBefore(dragged, item);
+            else container.insertBefore(dragged, item.nextSibling);
+          });
+        });
+      }
+      function initNavCatalog() {
+        applyNavOrder();
+      }
+
       function initUXEnhancements() {
         // —— 客户卡折叠（委托点击）——
         document.addEventListener('click', function (e) {
@@ -1420,6 +1546,7 @@
 
           bindDraftAutosave();
           initUXEnhancements();
+          initNavCatalog();
 
           // 首屏补一次草稿恢复与分组渲染
           try { applyDraft('daily'); } catch (e) {}
@@ -1444,5 +1571,11 @@
 
       // 暴露少量调试入口
       window.__wbSync = Sync;
+      window.openSettingsModal = openSettingsModal;
+      window.closeSettingsModal = closeSettingsModal;
+      window.saveNavCatalog = saveNavCatalog;
+      window.resetNavCatalog = resetNavCatalog;
+      window.moveNavItem = moveNavItem;
+      window.toggleNavItemVisible = toggleNavItemVisible;
     })();
   </script>

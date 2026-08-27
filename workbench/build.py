@@ -64,7 +64,7 @@ OLD_TABBAR = '''    <!-- ===== 标签栏 ===== -->
   </div>'''
 
 NEW_TABBAR = '''    <!-- ===== 七大板块导航 ===== -->
-    <div class="tab-bar">
+    <div class="tab-bar" id="topNavBar">
       <button class="top-tab active" data-tab="dash">🛰️ 情报搜集</button>
       <button class="top-tab" data-tab="inspire">💡 灵感早报</button>
       <button class="top-tab" data-tab="work">🗓️ 日常工作</button>

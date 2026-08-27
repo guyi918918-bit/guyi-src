@@ -797,6 +797,91 @@
       border: none;
       font-size: 14px;
     }
+    .client-item .engagement-tag,
+    .client-item .role-tag {
+      font-size: 11px;
+      padding: 1px 8px;
+      border-radius: 12px;
+    }
+    .interaction-dashboard {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0;
+    }
+    .interaction-dashboard .id-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .interaction-dashboard .id-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .interaction-dashboard .id-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-color);
+      opacity: 0.75;
+    }
+    .interaction-dashboard .id-count {
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .interaction-dashboard .id-badge {
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    .method-checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .method-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      background: var(--tag-bg);
+      color: var(--tag-color);
+      padding: 3px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: 0.15s;
+    }
+    .method-check:has(input:checked) {
+      background: var(--step-done);
+      border-color: var(--btn-save);
+      color: var(--btn-save);
+    }
+    .method-check input {
+      margin: 0;
+      cursor: pointer;
+    }
+    .followup-item .followup-methods {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-right: 6px;
+    }
+    .followup-item .followup-methods span {
+      font-size: 11px;
+      background: var(--tag-bg);
+      color: var(--tag-color);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
     .stat-wrap {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -1924,8 +2009,9 @@
         <option value="closeness">紧密程度</option>
         <option value="recent">近期有活动</option>
         <option value="followup">最近跟进优先</option>
+        <option value="interactions">互动频繁优先</option>
       </select>
-      <input type="search" id="client-search" placeholder="🔍 搜索客户/联系人" oninput="renderClients()" style="min-width:150px;flex:1;max-width:260px;" />
+      <input type="search" id="client-search" placeholder="🔍 搜索客户/联系人/决策人角色" oninput="renderClients()" style="min-width:150px;flex:1;max-width:260px;" />
       <label>级别 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">客户级别编码</span><span class="tt-row"><span class="tt-k">43</span><span class="tt-d">利润 ＞ 20 万</span></span><span class="tt-row"><span class="tt-k">42</span><span class="tt-d">利润 10–20 万</span></span><span class="tt-row"><span class="tt-k">41</span><span class="tt-d">利润 5–10 万</span></span><span class="tt-row"><span class="tt-k">40</span><span class="tt-d">利润 ＜ 5 万</span></span><span class="tt-row"><span class="tt-k">34</span><span class="tt-d">危机客户</span></span><span class="tt-row"><span class="tt-k">33</span><span class="tt-d">两年以上未成交老客户</span></span><span class="tt-row"><span class="tt-k">32</span><span class="tt-d">需求客户</span></span><span class="tt-row"><span class="tt-k">31</span><span class="tt-d">手微客户</span></span><span class="tt-row"><span class="tt-k">22</span><span class="tt-d">负责人客户（仅座机/负责人姓名）</span></span></span></span></label>
       <select id="client-filter-level" onchange="renderClients()">
         <option value="">全部</option>
@@ -1948,12 +2034,21 @@
         <option value="D">D</option>
         <option value="E">E</option>
       </select>
-      <label>紧密程度</label>
+      <label>决策人角色 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">决策人角色</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">拍板人：能签字付款</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">影响者：筛选供应商、汇报</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">传声筒：只负责转交资料</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">待确认：还没摸清底细</span></span></span></span></label>
+      <select id="client-filter-role" onchange="renderClients()">
+        <option value="">全部</option>
+        <option value="A">A 拍板人</option>
+        <option value="B">B 影响者</option>
+        <option value="C">C 传声筒</option>
+        <option value="D">D 待确认</option>
+      </select>
+      <label>紧密程度 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">紧密程度</span><span class="tt-row"><span class="tt-k">🔴 高</span><span class="tt-d">重点维护，频繁互动</span></span><span class="tt-row"><span class="tt-k">🟡 中</span><span class="tt-d">正常维护，定期跟进</span></span><span class="tt-row"><span class="tt-k">🟢 低</span><span class="tt-d">低频次维护</span></span><span class="tt-row"><span class="tt-k">⚫ 沉睡</span><span class="tt-d">长期无互动</span></span></span></span></label>
       <select id="client-filter-closeness" onchange="renderClients()">
         <option value="">全部</option>
-        <option value="高">高</option>
-        <option value="中">中</option>
-        <option value="低">低</option>
+        <option value="高">🔴 高</option>
+        <option value="中">🟡 中</option>
+        <option value="低">🟢 低</option>
+        <option value="沉睡">⚫ 沉睡</option>
       </select>
       <button class="btn-sm" onclick="document.querySelectorAll('#panel-clients .filter-bar select').forEach(el=>el.value='');renderClients()">清空</button>
     </div>
@@ -1961,11 +2056,11 @@
       <div class="form-col"><label>客户名称 <span class="red-star">*</span></label><input type="text" id="client-name" /></div>
       <div class="form-col"><label>客户级别 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">客户级别编码</span><span class="tt-row"><span class="tt-k">43</span><span class="tt-d">利润 ＞ 20 万</span></span><span class="tt-row"><span class="tt-k">42</span><span class="tt-d">利润 10–20 万</span></span><span class="tt-row"><span class="tt-k">41</span><span class="tt-d">利润 5–10 万</span></span><span class="tt-row"><span class="tt-k">40</span><span class="tt-d">利润 ＜ 5 万</span></span><span class="tt-row"><span class="tt-k">34</span><span class="tt-d">危机客户</span></span><span class="tt-row"><span class="tt-k">33</span><span class="tt-d">两年以上未成交老客户</span></span><span class="tt-row"><span class="tt-k">32</span><span class="tt-d">需求客户</span></span><span class="tt-row"><span class="tt-k">31</span><span class="tt-d">手微客户</span></span><span class="tt-row"><span class="tt-k">22</span><span class="tt-d">负责人客户（仅座机/负责人姓名）</span></span></span></span></label><select id="client-level"><option value="">—</option><option value="43">43｜利润＞20万</option><option value="42">42｜利润10–20万</option><option value="41">41｜利润5–10万</option><option value="40">40｜利润＜5万</option><option value="34">34｜危机客户</option><option value="33">33｜两年以上未成交</option><option value="32">32｜需求客户</option><option value="31">31｜手微客户</option><option value="22">22｜负责人客户</option></select></div>
       <div class="form-col"><label>重要程度（消费能力） <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">消费能力分级</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">全年预估业绩 ≥ 5 万</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">全年预估业绩 ≥ 3 万</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">全年预估业绩 ≥ 1 万</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">曾经消费过，但近 2 年无需求/消费</span></span><span class="tt-row"><span class="tt-k">E</span><span class="tt-d">放弃跟进</span></span></span></span></label><select id="client-importance"><option value="">—</option><option value="A">A｜全年预估业绩≥5万</option><option value="B">B｜全年预估业绩≥3万</option><option value="C">C｜全年预估业绩≥1万</option><option value="D">D｜曾经消费过但近2年无需求/消费</option><option value="E">E｜放弃跟进</option></select></div>
-      <div class="form-col"><label>紧密程度</label><select id="client-closeness"><option value="">—</option><option>高</option><option>中</option><option>低</option></select></div>
+      <div class="form-col"><label>紧密程度 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">紧密程度</span><span class="tt-row"><span class="tt-k">🔴 高</span><span class="tt-d">重点维护，频繁互动</span></span><span class="tt-row"><span class="tt-k">🟡 中</span><span class="tt-d">正常维护，定期跟进</span></span><span class="tt-row"><span class="tt-k">🟢 低</span><span class="tt-d">低频次维护</span></span><span class="tt-row"><span class="tt-k">⚫ 沉睡</span><span class="tt-d">长期无互动</span></span></span></span></label><select id="client-closeness"><option value="">—</option><option value="高">🔴 高</option><option value="中">🟡 中</option><option value="低">🟢 低</option><option value="沉睡">⚫ 沉睡</option></select></div>
     </div>
     <div class="form-row">
+      <div class="form-col"><label>决策人角色 <span class="red-star">*</span> <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">决策人角色</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">拍板人：工会主席/最高领导/其他，能签字付款</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">影响者：行政/HR/小领导，负责筛选供应商、汇报</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">传声筒：联系人/助理，只负责转交资料</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">待确认：还没摸清底细</span></span></span></span></label><select id="client-role"><option value="">—</option><option value="A">A｜拍板人</option><option value="B">B｜影响者</option><option value="C">C｜传声筒</option><option value="D">D｜待确认</option></select></div>
       <div class="form-col"><label>联系人</label><input type="text" id="client-contact" placeholder="座机 / 负责人姓名" /></div>
-      <div class="form-col"><label>行业</label><input type="text" id="client-industry" /></div>
       <div class="form-col"><label>备注</label><input type="text" id="client-remark" /></div>
     </div>
     <div class="form-row">
@@ -2095,14 +2190,14 @@
       <div style="margin:12px 0;padding:12px;background:var(--card-bg);border-radius:8px;font-size:13px;">
         <p><strong>📌 格式要求：</strong></p>
         <p>每行一个客户，字段用 <strong>英文逗号</strong> 分隔，顺序如下：</p>
-        <p><code>客户名称,级别,重要程度,紧密程度,联系人,行业,备注,过往消费(多行用分号分隔)</code></p>
+        <p><code>客户名称,级别,重要程度,紧密程度,决策人角色,联系人,备注,过往消费(多行用分号分隔)</code></p>
         <p><strong>示例：</strong></p>
         <pre style="background:var(--code-bg);padding:8px;border-radius:4px;margin:4px 0;">
-张三,43,A,高,张经理,IT,重点客户,2025-08 夏季促销;2024-09 中秋活动
-李四,42,B,中,李总,金融,,2025-10 国庆合作
+张三,43,A,高,A,张经理,重点客户,2025-08 夏季促销;2024-09 中秋活动
+李四,42,B,中,B,李总,,2025-10 国庆合作
         </pre>
-        <p>💡 级别为数字编码（43 利润＞20万 / 42 10–20万 / 41 5–10万 / 40 ＜5万 / 34 危机 / 33 两年以上老客 / 32 需求 / 31 手微 / 22 负责人客户）；重要程度可选 A/B/C/D/E：A 全年预估业绩≥5万｜B ≥3万｜C ≥1万｜D 曾经消费过但近2年无需求/消费｜E 放弃跟进；紧密程度可选 高/中/低；过往消费多条用分号分隔。跟进记录格式：<code>[回复 2026-08-20 10:00] 内容</code>，多条用 | 分隔。</p>
-        <p>⚠️ 客户名称不可为空，若名称已存在则覆盖更新。</p>
+        <p>💡 级别为数字编码（43 利润＞20万 / 42 10–20万 / 41 5–10万 / 40 ＜5万 / 34 危机 / 33 两年以上老客 / 32 需求 / 31 手微 / 22 负责人客户）；重要程度可选 A/B/C/D/E：A 全年预估业绩≥5万｜B ≥3万｜C ≥1万｜D 曾经消费过但近2年无需求/消费｜E 放弃跟进；紧密程度可选 🔴高/🟡中/🟢低/⚫沉睡；决策人角色 A=拍板人/B=影响者/C=传声筒/D=待确认。过往消费多条用分号分隔。跟进记录格式：<code>[2026-08-20 10:00] 内容 {{客户主动联系,微信互动}}</code>，互动方式用英文逗号，多条用 | 分隔。</p>
+        <p>⚠️ 客户名称、决策人角色不可为空，若名称已存在则覆盖更新。</p>
         <button class="btn-sm" onclick="downloadClientTemplate()">📄 下载模板CSV</button>
       </div>
       <textarea id="clientCsvInput" rows="10" style="width:100%;font-family:monospace;font-size:13px;" placeholder="在此粘贴CSV数据..."></textarea>
@@ -2131,7 +2226,7 @@
       <div style="margin:12px 0;padding:12px;background:var(--card-bg);border-radius:8px;font-size:13px;">
         <p><strong>📌 支持导入的数据类型及列名要求：</strong></p>
         <ul style="margin-left:16px;line-height:1.8;">
-          <li><strong>客户：</strong> 列名需包含 <code>name</code>, <code>level</code>, <code>importance</code>, <code>closeness</code>, <code>contact</code>, <code>phone</code>, <code>industry</code>, <code>remark</code>（其他列忽略）</li>
+          <li><strong>客户：</strong> 列名需包含 <code>name</code>, <code>level</code>, <code>importance</code>, <code>closeness</code>, <code>decisionMakerRole</code>, <code>contact</code>, <code>remark</code>（其他列忽略）；其中 <code>closeness</code> 可用 🔴高/🟡中/🟢低/⚫沉睡，<code>decisionMakerRole</code> 用 A/B/C/D</li>
           <li><strong>日报：</strong> 需包含 <code>date</code>, <code>follow</code>, <code>interview</code> 等字段</li>
           <li><strong>周报：</strong> 需包含 <code>week</code>, <code>target</code>, <code>finish</code> 等</li>
           <li><strong>月报：</strong> 需包含 <code>month</code>, <code>target</code>, <code>finish</code>, <code>crm40</code> 等</li>
@@ -2620,6 +2715,7 @@
           level: '',
           importance: '',
           closeness: '',
+          decisionMakerRole: '',
           contact: '',
           phone: '',
           industry: '',
@@ -2670,14 +2766,158 @@
     }
     function parseFollowUpsFromText(text) {
       if (!text) return [];
-      const typeMap = { '回复': 'reply', '联系': 'contact', '备注': 'note' };
       const list = [];
-      const re = /\[(回复|联系|备注)\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\]\s*([^|]*)/g;
+      // 新格式：[2026-08-20 10:00] 内容 {{客户主动联系,微信互动}}
+      const reNew = /\[(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\]\s*([^|{}]*)\s*(?:\{\{([^}]*)\}\})?/g;
       let m;
-      while ((m = re.exec(text)) !== null) {
-        list.push({ type: typeMap[m[1]] || 'note', time: m[2], content: m[3].trim() });
+      while ((m = reNew.exec(text)) !== null) {
+        const methods = (m[3] || '').split(',').map(s => s.trim()).filter(s => s);
+        list.push({ time: m[1], content: m[2].trim(), methods });
+      }
+      if (list.length) return list;
+      // 旧格式兼容：[回复 2026-08-20 10:00] 内容
+      const typeMap = { '回复': 'reply', '联系': 'contact', '备注': 'note' };
+      const legacyMap = { 'reply': ['客户主动联系'], 'contact': ['电话沟通'], 'note': [] };
+      const reOld = /\[(回复|联系|备注)\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})\]\s*([^|]*)/g;
+      while ((m = reOld.exec(text)) !== null) {
+        const type = typeMap[m[1]] || 'note';
+        list.push({ time: m[2], content: m[3].trim(), methods: legacyMap[type] || [] });
       }
       return list;
+    }
+
+    const DECISION_MAKER_ROLES = {
+      'A': { label: 'A｜拍板人', short: '拍板人', emoji: '👑', desc: '工会主席/最高领导/其他，能签字付款' },
+      'B': { label: 'B｜影响者', short: '影响者', emoji: '🔍', desc: '行政/HR/小领导，负责筛选供应商、汇报' },
+      'C': { label: 'C｜传声筒', short: '传声筒', emoji: '📢', desc: '联系人/助理，只负责转交资料' },
+      'D': { label: 'D｜待确认', short: '待确认', emoji: '❓', desc: '还没摸清底细' }
+    };
+
+    const ENGAGEMENT_LEVELS = {
+      '高': { color: '#ef4444', emoji: '🔴', label: '高', desc: '重点维护，频繁互动' },
+      '中': { color: '#f59e0b', emoji: '🟡', label: '中', desc: '正常维护，定期跟进' },
+      '低': { color: '#22c55e', emoji: '🟢', label: '低', desc: '低频次维护' },
+      '沉睡': { color: '#6b7280', emoji: '⚫', label: '沉睡', desc: '长期无互动' }
+    };
+
+    const INTERACTION_METHODS = [
+      { key: '客户主动联系', emoji: '💬', label: '客户主动联系' },
+      { key: '微信互动', emoji: '📱', label: '微信互动' },
+      { key: '电话沟通', emoji: '📞', label: '电话沟通' },
+      { key: '面谈/饭局', emoji: '☕', label: '面谈/饭局' },
+      { key: '活动现场接触', emoji: '🎯', label: '活动现场接触' },
+      { key: '方案/报价往来', emoji: '📋', label: '方案/报价往来' },
+      { key: '节日祝福', emoji: '🥮', label: '节日祝福' },
+      { key: '礼品往来', emoji: '🎁', label: '礼品往来' }
+    ];
+
+    const INTERACTION_THRESHOLDS = [
+      { max: 0, color: '#6b7280', emoji: '⚫', label: '今年无互动', desc: '完全沉默，需激活或放弃' },
+      { max: 5, color: '#f59e0b', emoji: '🟡', label: '偶尔互动', desc: '有联系但不紧密，需主动推进' },
+      { max: 10, color: '#22c55e', emoji: '🟢', label: '互动频繁', desc: '关系健康，正常维护即可' },
+      { max: Infinity, color: '#ef4444', emoji: '🔴', label: '高频互动', desc: '核心客户，重点维护' }
+    ];
+
+    function getDecisionMakerRoleInfo(role) {
+      return DECISION_MAKER_ROLES[role] || { label: role || '—', short: role || '—', emoji: '', desc: '' };
+    }
+
+    function getEngagementLevelInfo(level) {
+      return ENGAGEMENT_LEVELS[level] || { color: '#6b7280', emoji: '⚪', label: level || '—', desc: '' };
+    }
+
+    function getYearInteractionCount(client) {
+      if (!client.followUps || !client.followUps.length) return 0;
+      const year = getCurrentYear();
+      return client.followUps.filter(f => {
+        if (!f.time) return false;
+        const fy = parseInt(f.time.split('-')[0]);
+        if (fy !== year) return false;
+        const methods = f.methods || [];
+        // 旧数据 type='reply'/'contact' 视为有效互动，纯备注不计入
+        if (methods.length) return true;
+        return f.type === 'reply' || f.type === 'contact';
+      }).length;
+    }
+
+    function getInteractionLevelInfo(count) {
+      return INTERACTION_THRESHOLDS.find(t => count <= t.max) || INTERACTION_THRESHOLDS[INTERACTION_THRESHOLDS.length - 1];
+    }
+
+    function getLastReplyDate(client) {
+      if (!client.followUps || !client.followUps.length) return null;
+      const replies = client.followUps.filter(f => {
+        if ((f.methods || []).includes('客户主动联系')) return true;
+        return f.type === 'reply';
+      }).map(f => new Date(f.time || 0).getTime()).filter(t => !isNaN(t));
+      return replies.length ? new Date(Math.max(...replies)) : null;
+    }
+
+    function formatInteractionMethods(methods, type) {
+      if (methods && methods.length) {
+        return methods.map(m => {
+          const item = INTERACTION_METHODS.find(x => x.key === m);
+          return item ? `${item.emoji} ${item.label}` : m;
+        }).join(' ');
+      }
+      // 兼容旧数据
+      if (type === 'reply') return '💬 客户主动联系';
+      if (type === 'contact') return '📞 电话沟通';
+      return '📝 备注记录';
+    }
+
+    function hasClientInitiated(client) {
+      if (!client.followUps || !client.followUps.length) return false;
+      return client.followUps.some(f => (f.methods || []).includes('客户主动联系') || f.type === 'reply');
+    }
+
+    function renderInteractionDashboard(client) {
+      const count = getYearInteractionCount(client);
+      const info = getInteractionLevelInfo(count);
+      const lastReply = getLastReplyDate(client);
+      const lastReplyStr = lastReply ? formatDate(lastReply) : '—';
+      return `
+        <div class="interaction-dashboard">
+          <div class="id-title">📊 互动数据看板</div>
+          <div class="id-row">
+            <span class="id-label">今年有效互动：</span>
+            <span class="id-count" style="color:${info.color}">【 ${count} 次 】</span>
+            <span class="id-badge" style="background:${info.color}20;color:${info.color};border:1px solid ${info.color}40;">${info.emoji} ${info.label}</span>
+            <span class="info-icon" tabindex="0">ⓘ
+              <span class="tooltip" style="min-width:320px;">
+                <span class="tt-title">有效互动分级</span>
+                ${INTERACTION_THRESHOLDS.map(t => `<span class="tt-row"><span class="tt-k">${t.emoji} ${t.max === Infinity ? '10次以上' : t.max === 0 ? '0次' : t.max === 5 ? '1–5次' : '6–10次'}</span><span class="tt-d">${t.label}：${t.desc}</span></span>`).join('')}
+              </span>
+            </span>
+          </div>
+          <div class="id-row id-sub">最后一次回复：${lastReplyStr}</div>
+        </div>
+      `;
+    }
+
+    function migrateClientData(client) {
+      if (!client) return client;
+      // 旧 industry 自由文本迁移到决策人角色：若看起来像 A/B/C/D 则保留，否则清空待用户重填
+      if (!client.decisionMakerRole && client.industry) {
+        const v = String(client.industry).trim().toUpperCase();
+        if (DECISION_MAKER_ROLES[v]) client.decisionMakerRole = v;
+      }
+      // 旧紧密程度可直接沿用
+      if (client.closeness && !ENGAGEMENT_LEVELS[client.closeness]) {
+        // 不认识的值清空
+        client.closeness = '';
+      }
+      // 旧 followUps 若缺 methods，按 type 补一个默认方法
+      if (client.followUps) {
+        client.followUps.forEach(f => {
+          if (!f.methods) {
+            if (f.type === 'reply') f.methods = ['客户主动联系'];
+            else if (f.type === 'contact') f.methods = ['电话沟通'];
+            else f.methods = [];
+          }
+        });
+      }
+      return client;
     }
 
     function getUpcomingActivities(client) {
@@ -2746,16 +2986,21 @@
     }
 
     function renderClients() {
-      let list = getClients();
+      let list = getClients().map(c => migrateClientData(c));
+      // 持久化迁移结果
+      const original = getClients();
+      if (JSON.stringify(original) !== JSON.stringify(list)) setClients(list);
       const levelFilter = document.getElementById('client-filter-level').value;
       const importanceFilter = document.getElementById('client-filter-importance').value;
       const closenessFilter = document.getElementById('client-filter-closeness').value;
+      const roleFilter = document.getElementById('client-filter-role').value;
       if (levelFilter) list = list.filter(c => c.level === levelFilter);
       if (importanceFilter) list = list.filter(c => c.importance === importanceFilter);
       if (closenessFilter) list = list.filter(c => c.closeness === closenessFilter);
+      if (roleFilter) list = list.filter(c => c.decisionMakerRole === roleFilter);
       const searchVal = document.getElementById('client-search').value.trim().toLowerCase();
       if (searchVal) {
-        list = list.filter(c => (c.name || '').toLowerCase().includes(searchVal) || (c.contact || '').toLowerCase().includes(searchVal) || (c.industry || '').toLowerCase().includes(searchVal) || (c.remark || '').toLowerCase().includes(searchVal));
+        list = list.filter(c => (c.name || '').toLowerCase().includes(searchVal) || (c.contact || '').toLowerCase().includes(searchVal) || (c.remark || '').toLowerCase().includes(searchVal) || (c.decisionMakerRole || '').toLowerCase().includes(searchVal) || getDecisionMakerRoleInfo(c.decisionMakerRole).short.includes(searchVal));
       }
       const sortKey = document.getElementById('client-sort').value;
       if (sortKey === 'name') {
@@ -2767,8 +3012,8 @@
         const order = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, '': 6 };
         list.sort((a, b) => (order[a.importance] || 6) - (order[b.importance] || 6));
       } else if (sortKey === 'closeness') {
-        const order = { '高': 1, '中': 2, '低': 3, '': 4 };
-        list.sort((a, b) => (order[a.closeness] || 4) - (order[b.closeness] || 4));
+        const order = { '高': 1, '中': 2, '低': 3, '沉睡': 4, '': 5 };
+        list.sort((a, b) => (order[a.closeness] || 5) - (order[b.closeness] || 5));
       } else if (sortKey === 'recent') {
         list.sort((a, b) => {
           const upA = getUpcomingActivities(a);
@@ -2790,6 +3035,13 @@
           if (tA && tB) return tB - tA;
           return a.name.localeCompare(b.name);
         });
+      } else if (sortKey === 'interactions') {
+        list.sort((a, b) => {
+          const cntA = getYearInteractionCount(a);
+          const cntB = getYearInteractionCount(b);
+          if (cntA !== cntB) return cntB - cntA;
+          return a.name.localeCompare(b.name);
+        });
       }
       const container = document.getElementById('client-list-container');
       if (!list.length) { container.innerHTML = '<div class="empty-tip">暂无客户</div>'; return; }
@@ -2797,20 +3049,21 @@
         const historyStr = formatHistory(c.history);
         const levelTag = c.level ? `<span class="tag">级别 ${c.level}</span>` : '';
         const importanceTag = c.importance ? `<span class="tag">消费 ${c.importance}</span>` : '';
-        const closenessTag = c.closeness ? `<span class="tag">紧密 ${c.closeness}</span>` : '';
+        const egInfo = getEngagementLevelInfo(c.closeness);
+        const closenessTag = c.closeness ? `<span class="tag engagement-tag" style="background:${egInfo.color}20;color:${egInfo.color};border:1px solid ${egInfo.color}40;">${egInfo.emoji} ${c.closeness}</span>` : '';
+        const roleInfo = getDecisionMakerRoleInfo(c.decisionMakerRole);
+        const roleTag = c.decisionMakerRole ? `<span class="tag role-tag" title="${roleInfo.desc}">${roleInfo.emoji} ${roleInfo.label}</span>` : '';
         const upcoming = getUpcomingActivities(c);
         const isUrgent = upcoming.length > 0;
         const upcomingHtml = isUrgent ?
           `<div class="upcoming-badge">🔔 预警：${upcoming.map(u => `${u.month}月（${u.activity}）`).join('、')}</div>` :
           '';
         const lastFu = getLastFollowUp(c);
-        const hasReply = lastFu && lastFu.type === 'reply';
+        const hasReply = hasClientInitiated(c);
         const followBadge = lastFu ?
-          `<span class="tag follow-tag ${hasReply ? 'reply' : ''}">${hasReply ? '📩 有新回复' : '📝 已跟进'}</span>` :
+          `<span class="tag follow-tag ${hasReply ? 'reply' : ''}">${hasReply ? '💬 客户主动' : '📝 已跟进'}</span>` :
           '';
-        const followHtml = lastFu ?
-          `<div class="follow-badge">${hasReply ? '📩' : '📝'} 最近${lastFu.type === 'reply' ? '回复' : lastFu.type === 'contact' ? '联系' : '跟进'}：${escapeHtml(lastFu.content || '')} <span class="follow-time">${lastFu.time || ''}</span></div>` :
-          '';
+        const dashboardHtml = renderInteractionDashboard(c);
       return `
               <div class="client-item ${isUrgent ? 'urgent' : ''} ${hasReply ? 'has-reply' : ''}">
                   <input type="checkbox" class="client-select" value="${c.name}" />
@@ -2821,13 +3074,14 @@
                           ${levelTag}
                           ${importanceTag}
                           ${closenessTag}
+                          ${roleTag}
                           ${followBadge}
                       </div>
-                      <div class="client-quick">联系人：${c.contact || '-'}</div>
+                      <div class="client-quick">联系人：${c.contact || '-'} ｜ 决策人角色：${roleInfo.label}</div>
                       <div class="client-detail">
-                          <div>行业：${c.industry || '-'} ｜ 备注：${c.remark || '-'}</div>
+                          <div>备注：${c.remark || '-'}</div>
                           <div class="history-item">📋 过往消费：${historyStr}</div>
-                          ${followHtml}
+                          ${dashboardHtml}
                       </div>
                       ${upcomingHtml}
                   </div>
@@ -2843,18 +3097,19 @@
     }
 
     function exportClientsExcel() {
-      const list = getClients();
+      const list = getClients().map(c => migrateClientData(c));
       if (!list.length) { alert('暂无客户可导出'); return; }
+      setClients(list);
       const data = list.map(c => ({
         '客户名称': c.name,
         '级别': c.level || '',
         '重要程度': c.importance || '',
         '紧密程度': c.closeness || '',
+        '决策人角色': c.decisionMakerRole || '',
         '联系人': c.contact || '',
-        '行业': c.industry || '',
         '备注': c.remark || '',
         '过往消费': (c.history || []).map(h => `${h.month} ${h.activity}`).join('; '),
-        '跟进记录': (c.followUps || []).map(f => `[${f.type === 'reply' ? '回复' : f.type === 'contact' ? '联系' : '备注'} ${f.time}] ${f.content}`).join(' | ')
+        '跟进记录': (c.followUps || []).map(f => `[${f.time}] ${f.content}${(f.methods || []).length ? ' {{' + f.methods.join(',') + '}}' : ''}`).join(' | ')
       }));
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(data);
@@ -2874,12 +3129,12 @@
     }
 
     function downloadClientTemplate() {
-      const template = `客户名称,级别,重要程度,紧密程度,联系人,行业,备注,过往消费(分号分隔),跟进记录
-张三,43,A,高,张经理,IT,重点客户,2025-08 夏季促销;2024-09 中秋活动,[回复 2026-08-20 10:00] 对运动会项目感兴趣
-李四,42,B,中,李总,金融,,2025-10 国庆合作,
-王五,41,C,低,王主管,教育,,2025-11 校庆活动,
-赵六,40,D,低,赵主任,零售,近2年无需求,,
-孙七,34,E,低,孙经理,制造,放弃跟进,,`;
+      const template = `客户名称,级别,重要程度,紧密程度,决策人角色,联系人,备注,过往消费(分号分隔),跟进记录
+张三,43,A,高,A,张经理,重点客户,2025-08 夏季促销;2024-09 中秋活动,[2026-08-20 10:00] 对运动会项目感兴趣 {{客户主动联系,微信互动}}
+李四,42,B,中,B,李总,,2025-10 国庆合作,
+王五,41,C,低,C,王主管,,2025-11 校庆活动,
+赵六,40,D,低,D,赵主任,近2年无需求,,
+孙七,34,E,低,D,孙经理,放弃跟进,,`;
       const blob = new Blob(['\uFEFF' + template], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -2903,13 +3158,14 @@
       const levelIdx = headers.findIndex(h => h.includes('级别'));
       const importanceIdx = headers.findIndex(h => h.includes('重要程度'));
       const closenessIdx = headers.findIndex(h => h.includes('紧密程度'));
+      const roleIdx = headers.findIndex(h => h.includes('决策人角色') || h.includes('角色'));
       const contactIdx = headers.findIndex(h => h.includes('联系人'));
-      const industryIdx = headers.findIndex(h => h.includes('行业'));
       const remarkIdx = headers.findIndex(h => h.includes('备注'));
       const historyIdx = headers.findIndex(h => h.includes('过往消费'));
       const followUpsIdx = headers.findIndex(h => h.includes('跟进记录'));
       let added = 0,
-        updated = 0;
+        updated = 0,
+        skipped = 0;
       const clients = getClients();
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',').map(c => c.trim());
@@ -2918,8 +3174,9 @@
         const level = levelIdx >= 0 ? cols[levelIdx] : '';
         const importance = importanceIdx >= 0 ? cols[importanceIdx] : '';
         const closeness = closenessIdx >= 0 ? cols[closenessIdx] : '';
+        let decisionMakerRole = roleIdx >= 0 ? cols[roleIdx] : '';
+        if (!decisionMakerRole) decisionMakerRole = 'D';
         const contact = contactIdx >= 0 ? cols[contactIdx] : '';
-        const industry = industryIdx >= 0 ? cols[industryIdx] : '';
         const remark = remarkIdx >= 0 ? cols[remarkIdx] : '';
         const historyStr = historyIdx >= 0 ? cols[historyIdx] : '';
         const history = historyStr ? historyStr.split(';').map(h => h.trim()).filter(h => h).map(h => {
@@ -2938,8 +3195,8 @@
           existing.level = level;
           existing.importance = importance;
           existing.closeness = closeness;
+          existing.decisionMakerRole = decisionMakerRole;
           existing.contact = contact;
-          existing.industry = industry;
           existing.remark = remark;
           existing.history = history;
           if (followUps !== undefined) existing.followUps = followUps;
@@ -2950,8 +3207,8 @@
             level,
             importance,
             closeness,
+            decisionMakerRole,
             contact,
-            industry,
             remark,
             history,
             followUps: followUps || []
@@ -2962,14 +3219,16 @@
       setClients(clients);
       renderClients();
       document.getElementById('clientImportResult').innerHTML =
-        `<div style="color:#059669;font-weight:bold;">✅ 导入完成：新增 ${added} 条，更新 ${updated} 条</div>`;
-      alert(`✅ 导入完成：新增 ${added} 条，更新 ${updated} 条`);
+        `<div style="color:#059669;font-weight:bold;">✅ 导入完成：新增 ${added} 条，更新 ${updated} 条${skipped ? `，跳过 ${skipped} 条` : ''}</div>`;
+      alert(`✅ 导入完成：新增 ${added} 条，更新 ${updated} 条${skipped ? `，跳过 ${skipped} 条` : ''}`);
       closeClientImportModal();
     }
 
     function addClient() {
       const name = document.getElementById('client-name').value.trim();
       if (!name) { alert('请输入客户名称'); return; }
+      const decisionMakerRole = document.getElementById('client-role').value;
+      if (!decisionMakerRole) { alert('请选择决策人角色'); return; }
       const list = getClients();
       if (list.find(c => c.name === name)) { alert('客户已存在'); return; }
       const historyText = document.getElementById('client-history').value;
@@ -2979,8 +3238,8 @@
         level: document.getElementById('client-level').value,
         importance: document.getElementById('client-importance').value,
         closeness: document.getElementById('client-closeness').value,
+        decisionMakerRole,
         contact: document.getElementById('client-contact').value.trim(),
-        industry: document.getElementById('client-industry').value.trim(),
         remark: document.getElementById('client-remark').value.trim(),
         history: history,
         followUps: []
@@ -2990,8 +3249,8 @@
       document.getElementById('client-level').value = '';
       document.getElementById('client-importance').value = '';
       document.getElementById('client-closeness').value = '';
+      document.getElementById('client-role').value = '';
       document.getElementById('client-contact').value = '';
-      document.getElementById('client-industry').value = '';
       document.getElementById('client-remark').value = '';
       document.getElementById('client-history').value = '';
       renderClients();
@@ -3012,6 +3271,16 @@
 
     let editClientName = '';
 
+    function renderMethodCheckboxes(selected) {
+      const sel = new Set(selected || []);
+      return `<div class="method-checks">${INTERACTION_METHODS.map(m => `
+        <label class="method-check">
+          <input type="checkbox" name="followup-method" value="${m.key}" ${sel.has(m.key) ? 'checked' : ''} />
+          <span>${m.emoji} ${m.label}</span>
+        </label>
+      `).join('')}</div>`;
+    }
+
     function editClient(name) {
       const list = getClients();
       const c = list.find(item => item.name === name);
@@ -3019,21 +3288,20 @@
       editClientName = name;
       const historyStr = (c.history || []).map(h => `${h.month} ${h.activity}`).join('\n');
       const body = document.getElementById('clientEditBody');
+      const egInfo = getEngagementLevelInfo(c.closeness);
       body.innerHTML = `
               <div class="form-row">
-                  <div class="form-col"><label>客户名称</label><input type="text" id="edit-client-name" value="${c.name}" /></div>
+                  <div class="form-col"><label>客户名称 <span class="red-star">*</span></label><input type="text" id="edit-client-name" value="${c.name}" /></div>
                   <div class="form-col"><label>客户级别 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">客户级别编码</span><span class="tt-row"><span class="tt-k">43</span><span class="tt-d">利润 ＞ 20 万</span></span><span class="tt-row"><span class="tt-k">42</span><span class="tt-d">利润 10–20 万</span></span><span class="tt-row"><span class="tt-k">41</span><span class="tt-d">利润 5–10 万</span></span><span class="tt-row"><span class="tt-k">40</span><span class="tt-d">利润 ＜ 5 万</span></span><span class="tt-row"><span class="tt-k">34</span><span class="tt-d">危机客户</span></span><span class="tt-row"><span class="tt-k">33</span><span class="tt-d">两年以上未成交老客户</span></span><span class="tt-row"><span class="tt-k">32</span><span class="tt-d">需求客户</span></span><span class="tt-row"><span class="tt-k">31</span><span class="tt-d">手微客户</span></span><span class="tt-row"><span class="tt-k">22</span><span class="tt-d">负责人客户（仅座机/负责人姓名）</span></span></span></span></label><select id="edit-client-level"><option value="">—</option><option value="43" ${c.level==='43'?'selected':''}>43｜利润＞20万</option><option value="42" ${c.level==='42'?'selected':''}>42｜利润10–20万</option><option value="41" ${c.level==='41'?'selected':''}>41｜利润5–10万</option><option value="40" ${c.level==='40'?'selected':''}>40｜利润＜5万</option><option value="34" ${c.level==='34'?'selected':''}>34｜危机客户</option><option value="33" ${c.level==='33'?'selected':''}>33｜两年以上未成交</option><option value="32" ${c.level==='32'?'selected':''}>32｜需求客户</option><option value="31" ${c.level==='31'?'selected':''}>31｜手微客户</option><option value="22" ${c.level==='22'?'selected':''}>22｜负责人客户</option></select></div>
-              </div>
-              <div class="form-row">
                   <div class="form-col"><label>重要程度（消费能力） <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">消费能力分级</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">全年预估业绩 ≥ 5 万</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">全年预估业绩 ≥ 3 万</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">全年预估业绩 ≥ 1 万</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">曾经消费过，但近 2 年无需求/消费</span></span><span class="tt-row"><span class="tt-k">E</span><span class="tt-d">放弃跟进</span></span></span></span></label><select id="edit-client-importance"><option value="">—</option><option value="A" ${c.importance==='A'?'selected':''}>A｜全年预估业绩≥5万</option><option value="B" ${c.importance==='B'?'selected':''}>B｜全年预估业绩≥3万</option><option value="C" ${c.importance==='C'?'selected':''}>C｜全年预估业绩≥1万</option><option value="D" ${c.importance==='D'?'selected':''}>D｜曾经消费过但近2年无需求/消费</option><option value="E" ${c.importance==='E'?'selected':''}>E｜放弃跟进</option></select></div>
-                  <div class="form-col"><label>紧密程度</label><select id="edit-client-closeness"><option value="">—</option><option ${c.closeness==='高'?'selected':''}>高</option><option ${c.closeness==='中'?'selected':''}>中</option><option ${c.closeness==='低'?'selected':''}>低</option></select></div>
               </div>
               <div class="form-row">
+                  <div class="form-col"><label>决策人角色 <span class="red-star">*</span> <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">决策人角色</span><span class="tt-row"><span class="tt-k">A</span><span class="tt-d">拍板人：工会主席/最高领导/其他，能签字付款</span></span><span class="tt-row"><span class="tt-k">B</span><span class="tt-d">影响者：行政/HR/小领导，负责筛选供应商、汇报</span></span><span class="tt-row"><span class="tt-k">C</span><span class="tt-d">传声筒：联系人/助理，只负责转交资料</span></span><span class="tt-row"><span class="tt-k">D</span><span class="tt-d">待确认：还没摸清底细</span></span></span></span></label><select id="edit-client-role"><option value="">—</option><option value="A" ${c.decisionMakerRole==='A'?'selected':''}>A｜拍板人</option><option value="B" ${c.decisionMakerRole==='B'?'selected':''}>B｜影响者</option><option value="C" ${c.decisionMakerRole==='C'?'selected':''}>C｜传声筒</option><option value="D" ${c.decisionMakerRole==='D'?'selected':''}>D｜待确认</option></select></div>
+                  <div class="form-col"><label>紧密程度 <span class="info-icon" tabindex="0">ⓘ<span class="tooltip"><span class="tt-title">紧密程度</span><span class="tt-row"><span class="tt-k">🔴 高</span><span class="tt-d">重点维护，频繁互动</span></span><span class="tt-row"><span class="tt-k">🟡 中</span><span class="tt-d">正常维护，定期跟进</span></span><span class="tt-row"><span class="tt-k">🟢 低</span><span class="tt-d">低频次维护</span></span><span class="tt-row"><span class="tt-k">⚫ 沉睡</span><span class="tt-d">长期无互动</span></span></span></span></label><select id="edit-client-closeness" style="color:${c.closeness ? egInfo.color : 'inherit'};border-color:${c.closeness ? egInfo.color : 'var(--input-border)'};"><option value="">—</option><option value="高" ${c.closeness==='高'?'selected':''}>🔴 高</option><option value="中" ${c.closeness==='中'?'selected':''}>🟡 中</option><option value="低" ${c.closeness==='低'?'selected':''}>🟢 低</option><option value="沉睡" ${c.closeness==='沉睡'?'selected':''}>⚫ 沉睡</option></select></div>
                   <div class="form-col"><label>联系人</label><input type="text" id="edit-client-contact" value="${c.contact||''}" placeholder="座机 / 负责人姓名" /></div>
               </div>
               <div class="form-row">
-                  <div class="form-col"><label>行业</label><input type="text" id="edit-client-industry" value="${c.industry||''}" /></div>
-                  <div class="form-col"><label>备注</label><input type="text" id="edit-client-remark" value="${c.remark||''}" /></div>
+                  <div class="form-col" style="flex:2;"><label>备注</label><input type="text" id="edit-client-remark" value="${c.remark||''}" /></div>
               </div>
               <div class="form-row">
                   <div class="form-col" style="flex:2;">
@@ -3043,25 +3311,23 @@
               </div>
               <div class="form-row" style="align-items:flex-start;">
                   <div class="form-col" style="flex:2;">
-                      <label>📋 跟进记录（最新的会显示在客户卡上）</label>
+                      ${renderInteractionDashboard(c)}
+                      <label style="margin-top:12px;display:block;">📋 跟进记录（最新的会显示在客户卡上）</label>
                       <div class="followup-list" id="edit-client-followups">
                           ${(c.followUps || []).slice().sort((a,b)=>new Date(b.time||0)-new Date(a.time||0)).map((f, i) => `
                             <div class="followup-item" data-idx="${i}">
-                              <span class="followup-type ${f.type || 'note'}">${f.type === 'reply' ? '客户回复' : f.type === 'contact' ? '我联系TA' : '备注记录'}</span>
                               <span class="followup-time">${f.time || ''}</span>
+                              <span class="followup-methods">${formatInteractionMethods(f.methods, f.type)}</span>
                               <span class="followup-content">${escapeHtml(f.content || '')}</span>
                               <span class="followup-del" onclick="deleteClientFollowUp(${i})" title="删除">✖</span>
                             </div>
                           `).join('') || '<div class="empty-tip" style="padding:8px 0;">暂无跟进记录</div>'}
                       </div>
                   </div>
-                  <div class="form-col" style="flex:1;min-width:180px;">
+                  <div class="form-col" style="flex:1;min-width:220px;">
                       <label>新增跟进</label>
-                      <select id="edit-followup-type" style="margin-bottom:6px;">
-                          <option value="reply">📩 客户回复</option>
-                          <option value="contact">📞 我联系TA</option>
-                          <option value="note">📝 备注记录</option>
-                      </select>
+                      <label style="font-size:12px;color:var(--text-color);opacity:.7;margin-bottom:6px;display:block;">互动方式（可多选）</label>
+                      ${renderMethodCheckboxes([])}
                       <textarea id="edit-followup-content" rows="2" placeholder="回复内容 / 联系摘要 / 需求或兴趣点"></textarea>
                       <button class="btn-save" style="margin-top:6px;width:100%;" onclick="addClientFollowUp()">➕ 添加跟进</button>
                   </div>
@@ -3078,12 +3344,14 @@
       const newName = document.getElementById('edit-client-name').value.trim();
       if (!newName) { alert('客户名称不能为空'); return; }
       if (list.some((item, i) => i !== idx && item.name === newName)) { alert('客户名称已存在'); return; }
+      const decisionMakerRole = document.getElementById('edit-client-role').value;
+      if (!decisionMakerRole) { alert('请选择决策人角色'); return; }
       c.name = newName;
       c.level = document.getElementById('edit-client-level').value;
       c.importance = document.getElementById('edit-client-importance').value;
       c.closeness = document.getElementById('edit-client-closeness').value;
+      c.decisionMakerRole = decisionMakerRole;
       c.contact = document.getElementById('edit-client-contact').value.trim();
-      c.industry = document.getElementById('edit-client-industry').value.trim();
       c.remark = document.getElementById('edit-client-remark').value.trim();
       const historyText = document.getElementById('edit-client-history').value;
       c.history = parseHistory(historyText);
@@ -3097,13 +3365,13 @@
       const list = getClients();
       const c = list.find(item => item.name === editClientName);
       if (!c) return;
-      const type = document.getElementById('edit-followup-type').value;
       const content = document.getElementById('edit-followup-content').value.trim();
       if (!content) { alert('请输入跟进内容'); return; }
+      const methods = Array.from(document.querySelectorAll('input[name="followup-method"]:checked')).map(cb => cb.value);
       const now = new Date();
       const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
       if (!c.followUps) c.followUps = [];
-      c.followUps.push({ type, content, time: timeStr });
+      c.followUps.push({ content, methods, time: timeStr });
       setClients(list);
       editClient(editClientName);
       renderClients();
@@ -5259,22 +5527,23 @@
               setStorage(KEY_MONTHLY, list);
               importedCount += count;
               previewHtml += `<div>✅ 月报: 导入 ${count} 条</div>`;
-            } else if (headerStr.includes('name') && headerStr.includes('industry') && headerStr.includes(
-                'contact')) {
+            } else if (headerStr.includes('name') && (headerStr.includes('decisionmakerrole') || headerStr.includes(
+                'industry')) && headerStr.includes('contact')) {
               const list = getStorage(KEY_CLIENTS);
               let count = 0;
               json.forEach(row => {
                 const name = row.name || '';
                 if (!name) return;
                 const existing = list.findIndex(c => c.name === name);
+                const decisionMakerRole = row.decisionMakerRole || (row.industry && /^[ABCD]$/i.test(String(row.industry).trim()) ? String(row.industry).trim().toUpperCase() : '');
                 const newItem = {
                   name: name,
                   level: row.level || '',
                   importance: row.importance || '',
                   closeness: row.closeness || '',
+                  decisionMakerRole: decisionMakerRole || 'D',
                   contact: row.contact || '',
                   phone: row.phone || '',
-                  industry: row.industry || '',
                   remark: row.remark || '',
                   history: []
                 };

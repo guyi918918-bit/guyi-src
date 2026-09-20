@@ -11,7 +11,22 @@ import difflib
 ROOT = pathlib.Path(__file__).resolve().parent
 BASE = ROOT.parent / "_extract" / "copy1.html"
 OUT = ROOT / "dist" / "index.html"
-NODE = "/Users/mianmian/.workbuddy/binaries/node/versions/22.22.2/bin/node"
+
+
+def _find_node():
+    """自动探测可用 node：PATH → managed versions 目录（取最新版本号）。"""
+    import os
+    import shutil
+    import glob as _glob
+    found = shutil.which("node")
+    if found:
+        return found
+    base_dir = "/Users/mianmian/.workbuddy/binaries/node/versions"
+    candidates = sorted(_glob.glob(base_dir + "/*/bin/node"), reverse=True)
+    return candidates[0] if candidates else "node"
+
+
+NODE = _find_node()
 
 ok = True
 

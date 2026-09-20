@@ -561,6 +561,8 @@
       WORK_SUBS.forEach(function (s) { var p = $("panel-" + s); if (p) p.classList.remove("show"); });
     }
     var p = $("panel-" + tab); if (p) p.classList.add("show");
+    // V7：待办看板仅在「日常工作」板块显示，其他板块隐藏
+    var tb = $("todoBoard"); if (tb) tb.style.display = (tab === "work") ? "" : "none";
     document.querySelectorAll(".top-tab").forEach(function (b) { b.classList.toggle("active", b.dataset.tab === tab); });
     try {
       if (tab === "work") { if (!currentSub) showSub("daily"); }

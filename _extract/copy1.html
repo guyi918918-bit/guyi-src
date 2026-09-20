@@ -2536,8 +2536,53 @@
       const item = todos.find(t => t.id === id);
       if (!item) return;
       item.done = !item.done;
+      if (item.done) syncTodoDoneToDaily(item);
       setTodos(todos);
       renderTodos();
+    }
+
+    // V7：待办完成 → 自动同步到当日日报「今日其他工作」
+    // 规则：只追加，不重复（同一待办同一天只同步一次）；取消勾选不撤销（日报可能已提交）；
+    // 同步后用户随时清空待办，日报里的记录不受影响。
+    function syncTodoDoneToDaily(item) {
+      try {
+        const now = new Date();
+        const today = formatDate(now);
+        if (item.syncedDate === today) return; // 防重复（取消后当天再勾选）
+        item.syncedDate = today;
+        const timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes());
+        const line = '✅ [' + timeStr + '] ' + (item.text || '(图片)');
+        const otherEl = document.getElementById('d-today-other');
+        const dateEl = document.getElementById('d-date');
+        // 路径 A：日报表单当前正在编辑今天 → 追加到输入框（随日报一起保存）
+        if (otherEl && dateEl && dateEl.value === today) {
+          const cur = otherEl.value.trim();
+          if (!cur.split('\n').some(l => l.trim() === line)) {
+            otherEl.value = cur ? cur + '\n' + line : line;
+          }
+          // 双写存储，防止未保存日报时切换页面丢失记录
+        }
+        // 写入存储中的当日日报（无则创建一条仅含今日其他工作的记录）
+        const list = getStorage(KEY_DAILY);
+        let data = list.find(x => x.dateRaw === today);
+        if (!data) {
+          const d = new Date(today);
+          data = {
+            date: formatDateCN(d),
+            dateRaw: today,
+            week: getWeekStrFromDate(today),
+            month: d.getFullYear() + '-' + pad(d.getMonth() + 1),
+            year: d.getFullYear(),
+            todayOther: line
+          };
+          list.push(data);
+        } else {
+          const cur = (data.todayOther || '').trim();
+          if (cur.split('\n').some(l => l.trim() === line)) return;
+          data.todayOther = cur ? cur + '\n' + line : line;
+        }
+        setStorage(KEY_DAILY, list);
+      } catch (e) { console.warn('[todo->daily 同步失败]', e); }
     }
 
     function setImportant(id, level) {

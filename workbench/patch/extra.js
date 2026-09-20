@@ -492,3 +492,126 @@
     });
   })();
 })();
+
+/* ============================================================
+ * V8：日报 / 周报 / 月报「其他」框 —— 平时保持小框，点击弹出大框编辑
+ * 仅新增交互，不改原有保存 / 汇总 / 草稿逻辑：
+ * 大框保存后写回原 textarea 并派发 input/change，原有草稿自动保存照常触发。
+ * ============================================================ */
+(function () {
+  "use strict";
+
+  var TARGETS = [
+    { id: "d-today-other", title: "今日其他工作" },
+    { id: "w-week-other-mon", title: "周一其他" },
+    { id: "w-week-other-tue", title: "周二其他" },
+    { id: "w-week-other-wed", title: "周三其他" },
+    { id: "w-week-other-thu", title: "周四其他" },
+    { id: "w-week-other-fri", title: "周五其他" },
+    { id: "m-month-other-week1", title: "第一周其他" },
+    { id: "m-month-other-week2", title: "第二周其他" },
+    { id: "m-month-other-week3", title: "第三周其他" },
+    { id: "m-month-other-week4", title: "第四周其他" }
+  ];
+
+  var overlay = null, bigTa = null, bigTitle = null;
+  var curEl = null, origVal = "";
+
+  function ensure() {
+    if (overlay) return overlay;
+    overlay = document.createElement("div");
+    overlay.className = "zoom-overlay";
+    overlay.innerHTML =
+      '<div class="zoom-card">' +
+        '<div class="zoom-head"><span class="zoom-title"></span>' +
+        '<button class="zoom-x" type="button" title="关闭（保存）">✕</button></div>' +
+        '<div class="zoom-body"><textarea class="zoom-ta" spellcheck="false"></textarea></div>' +
+        '<div class="zoom-foot">' +
+          '<button class="zoom-btn" type="button" data-act="cancel">取消</button>' +
+          '<button class="zoom-btn primary" type="button" data-act="save">保存</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    bigTa = overlay.querySelector(".zoom-ta");
+    bigTitle = overlay.querySelector(".zoom-title");
+
+    overlay.addEventListener("click", function (e) {
+      var t = e.target;
+      if (t === overlay) { commit(); return; }
+      var act = t && t.dataset ? t.dataset.act : null;
+      if (act === "save") commit();
+      else if (act === "cancel") cancel();
+      else if (t && t.classList && t.classList.contains("zoom-x")) commit();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (!overlay || overlay.style.display !== "flex") return;
+      if (e.key === "Escape") { e.preventDefault(); commit(); }
+    });
+
+    return overlay;
+  }
+
+  function open(field) {
+    var el = document.getElementById(field.id);
+    if (!el) return;
+    ensure();
+    curEl = el;
+    origVal = el.value;
+    bigTitle.textContent = "✏️ " + field.title + "（放大编辑）";
+    bigTa.value = el.value;
+    overlay.style.display = "flex";
+    setTimeout(function () {
+      try {
+        bigTa.focus();
+        bigTa.setSelectionRange(bigTa.value.length, bigTa.value.length);
+      } catch (e) {}
+    }, 30);
+  }
+
+  function close() {
+    if (overlay) overlay.style.display = "none";
+    curEl = null;
+  }
+
+  function commit() {
+    if (!curEl) return close();
+    var el = curEl;
+    el.value = bigTa.value;
+    // 保持原有联动：草稿自动保存 / 统计刷新（原本用户输入时也会触发）
+    try { el.dispatchEvent(new Event("input", { bubbles: true })); } catch (e) {}
+    try { el.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+    close();
+  }
+
+  function cancel() {
+    if (!curEl) return close();
+    curEl.value = origVal;
+    close();
+  }
+
+  function bind() {
+    TARGETS.forEach(function (f) {
+      var el = document.getElementById(f.id);
+      if (!el || el.dataset.zoomBound === "1") return;
+      el.dataset.zoomBound = "1";
+      el.classList.add("zoomable-ta");
+      el.setAttribute("title", "点击放大编辑");
+      el.addEventListener("click", function (e) { e.preventDefault(); open(f); });
+      // 标签旁加一颗「⤢ 放大」小按钮，方便发现
+      var lab = el.previousElementSibling;
+      if (lab && /^LABEL$/i.test(lab.tagName) && !lab.querySelector(".zoom-chip")) {
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "zoom-chip";
+        chip.textContent = "⤢ 放大";
+        chip.title = "放大编辑";
+        chip.addEventListener("click", function (e) { e.preventDefault(); open(f); });
+        lab.appendChild(chip);
+      }
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+})();

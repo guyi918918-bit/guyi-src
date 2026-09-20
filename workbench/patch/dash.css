@@ -736,7 +736,9 @@ textarea.zoomable-ta { cursor: zoom-in; }
   padding: 16px 20px; border-bottom: 1px solid var(--ui-border);
   font-size: 15px; font-weight: 700; color: var(--ui-text);
 }
-.zoom-x { border: none; background: transparent; font-size: 15px; color: var(--ui-text-soft); cursor: pointer; padding: 2px 6px; border-radius: 8px; }
+.zoom-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zoom-count { flex: none; font-size: 12px; font-weight: 400; color: var(--ui-text-soft); margin-left: 12px; font-variant-numeric: tabular-nums; }
+.zoom-x { flex: none; margin-left: 12px; border: none; background: transparent; font-size: 15px; color: var(--ui-text-soft); cursor: pointer; padding: 2px 6px; border-radius: 8px; }
 .zoom-x:hover { background: var(--ui-bg-soft); color: var(--ui-text); }
 .zoom-body { padding: 16px 20px; flex: 1; min-height: 0; }
 .zoom-ta {
@@ -746,7 +748,8 @@ textarea.zoomable-ta { cursor: zoom-in; }
   font-size: 14px; line-height: 1.6; resize: vertical; font-family: inherit;
 }
 .zoom-ta:focus { outline: none; border-color: var(--ui-primary); box-shadow: 0 0 0 3px var(--ui-primary-ghost); }
-.zoom-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 12px 20px 18px; border-top: 1px solid var(--ui-border); }
+.zoom-foot { display: flex; gap: 10px; align-items: center; justify-content: flex-end; padding: 12px 20px 18px; border-top: 1px solid var(--ui-border); }
+.zoom-hint { flex: 1; font-size: 12px; color: var(--ui-text-soft); }
 .zoom-btn {
   padding: 9px 20px; border-radius: 10px; border: 1px solid var(--ui-border);
   background: transparent; color: var(--ui-text); font-size: 14px; cursor: pointer; font-family: inherit;

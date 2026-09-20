@@ -662,10 +662,18 @@
             var merged = (k === 'sport_todos' || k === 'sport_daily_list')
               ? mergeSyncSafe(k, lv2, r.v)
               : r.v;
+            // V7.1：内容没变化就不计 changed，避免每个同步周期都空转 refreshUI
+            // （打断日报表单 / 触发草稿恢复），只在真实变化时刷新。
+            var beforeRaw = null;
+            try { beforeRaw = localStorage.getItem(k); } catch (e) {}
             applyRemote(k, merged);
             Sync.serverTs[k] = r.updated_at;
-            changed++;
-            if (IMAGE_KEYS.indexOf(k) >= 0) imageChanged = true;
+            var afterRaw = null;
+            try { afterRaw = localStorage.getItem(k); } catch (e) {}
+            if (afterRaw !== beforeRaw) {
+              changed++;
+              if (IMAGE_KEYS.indexOf(k) >= 0) imageChanged = true;
+            }
           });
 
           // 拉取到的图片数据先压缩再保留/同步，避免原图撑爆 Supabase 免费空间
@@ -970,7 +978,34 @@
         var drafts = getDrafts();
         var snap = drafts[dk];
         if (!snap) { showDraftTip(type, false); return; }
+        // V7.1 防覆盖：日报草稿恢复前，先记住表单里已有的「✅ 待办同步行」；
+        // 恢复后若草稿缺少这些行则补回，并刷新草稿快照——
+        // 否则旧草稿会在每次 loadDailyData 后把刚同步进来的待办记录盖掉（表现为显示 1 秒后消失）。
+        var keepEl = null, keepLines = null;
+        if (type === 'daily') {
+          keepEl = $('d-today-other');
+          if (keepEl) {
+            keepLines = (keepEl.value || '').split('\n').filter(function (l) { return l.indexOf('✅ [') === 0; });
+          }
+        }
         restorePanel(DRAFT_PANELS[type].panel, snap);
+        if (keepEl && keepLines && keepLines.length) {
+          var base = (keepEl.value || '').replace(/\s+$/, '');
+          var curLines = base ? base.split('\n') : [];
+          var missing = keepLines.filter(function (l) { return curLines.indexOf(l) < 0; });
+          if (missing.length) {
+            keepEl.value = base ? base + '\n' + missing.join('\n') : missing.join('\n');
+            try {
+              var fresh = getDrafts();
+              var s2 = fresh[dk];
+              if (s2) {
+                s2.fields = s2.fields || {};
+                s2.fields['d-today-other'] = keepEl.value;
+                setDrafts(fresh);
+              }
+            } catch (e) {}
+          }
+        }
         showDraftTip(type, true);
         try { if (window.updateLevelStats) updateLevelStats(); } catch (e) {}
         try {

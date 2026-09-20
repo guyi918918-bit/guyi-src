@@ -29,7 +29,8 @@ function run() {
   const $ = (id) => d.getElementById(id);
 
   check("6 个顶层板块", d.querySelectorAll(".top-tab").length === 6);
-  check("默认显示 情报搜集", $("panel-dash") && $("panel-dash").classList.contains("show"));
+  // V8：进入页面默认改为「日常工作」
+  check("默认显示 日常工作", $("panel-work") && $("panel-work").classList.contains("show"));
 
   // 季报已删除
   check("季报面板已移除", !$("panel-quarter"));

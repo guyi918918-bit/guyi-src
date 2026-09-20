@@ -650,7 +650,8 @@
     setUpdated(SEED);
     renderIntel();
     renderInspire();
-    showTop("dash");
+    // V8：进入页面默认显示「日常工作」板块（原为情报搜集）
+    showTop("work");
     loadAll();
     setInterval(loadAll, POLL_MS);
   }

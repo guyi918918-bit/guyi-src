@@ -575,6 +575,42 @@
         }
       }
 
+      // 拉取时对“含用户意图”的键做安全合并，避免陈旧云端版本破坏本地已完成状态 / 已同步记录。
+      // - sport_todos：按 id 合并，完成态取并集（任一侧已完成即视为完成）—— 防止勾选被回滚。
+      // - sport_daily_list：按 dateRaw 合并，「今日其他工作」多行去重合并 —— 防止已同步的待办记录丢失。
+      function mergeSyncSafe(key, local, remote) {
+        if (key === 'sport_todos') {
+          var tmap = {};
+          (Array.isArray(local) ? local : []).forEach(function (t) { if (t && t.id) tmap[t.id] = t; });
+          (Array.isArray(remote) ? remote : []).forEach(function (t) {
+            if (!t || !t.id) return;
+            if (tmap[t.id]) {
+              // 完成态并集：本地已完成或远端已完成都算完成，避免被陈旧版本回滚
+              tmap[t.id] = Object.assign({}, tmap[t.id], { done: !!(tmap[t.id].done || t.done) });
+            } else {
+              tmap[t.id] = t;
+            }
+          });
+          return Object.keys(tmap).map(function (id) { return tmap[id]; });
+        }
+        if (key === 'sport_daily_list') {
+          var dmap = {};
+          (Array.isArray(local) ? local : []).forEach(function (d) { if (d && d.dateRaw) dmap[d.dateRaw] = d; });
+          (Array.isArray(remote) ? remote : []).forEach(function (d) {
+            if (!d || !d.dateRaw) return;
+            if (dmap[d.dateRaw]) {
+              var lines = (dmap[d.dateRaw].todayOther || '').split('\n').filter(Boolean);
+              (d.todayOther || '').split('\n').forEach(function (l) { if (l && lines.indexOf(l) < 0) lines.push(l); });
+              dmap[d.dateRaw] = Object.assign({}, dmap[d.dateRaw], { todayOther: lines.join('\n') });
+            } else {
+              dmap[d.dateRaw] = d;
+            }
+          });
+          return Object.keys(dmap).map(function (k2) { return dmap[k2]; });
+        }
+        return remote;
+      }
+
       function hasLocalData() {
         for (var i = 0; i < SYNC_KEYS.length; i++) {
           var v = readRaw(SYNC_KEYS[i]);
@@ -621,7 +657,12 @@
               Sync.dirty[k] = true;
               return;
             }
-            applyRemote(k, r.v);
+            // 关键修复：待办 / 日报等含“用户意图”的键，拉取时做合并而非整覆盖，
+            // 避免「陈旧云端版本」回滚刚勾选完成的待办、或丢失调度到日报「今日其他工作」的记录。
+            var merged = (k === 'sport_todos' || k === 'sport_daily_list')
+              ? mergeSyncSafe(k, lv2, r.v)
+              : r.v;
+            applyRemote(k, merged);
             Sync.serverTs[k] = r.updated_at;
             changed++;
             if (IMAGE_KEYS.indexOf(k) >= 0) imageChanged = true;
@@ -725,6 +766,10 @@
         // 图片键：先压缩再同步，避免原图撑爆 Supabase 免费空间
         // 本地先存原图，压缩完成后回写更小的版本并触发一次同步
         if (!Sync.applying && isImageKey && !_shrinking[key]) {
+          // 同步置脏：立即挡住本轮 pull 覆盖，修复「勾选待办后 ✓ 被云端陈旧版本瞬间回滚」的问题
+          Sync.dirty[key] = true;
+          renderStatusBox();
+          schedulePush();
           _shrinking[key] = true;
           shrinkImages(arr).then(function (res) {
             _shrinking[key] = false;

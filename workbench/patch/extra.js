@@ -494,28 +494,75 @@
 })();
 
 /* ============================================================
- * V8：日报 / 周报 / 月报「其他」框 —— 平时保持小框，点击弹出大框编辑
- * 仅新增交互，不改原有保存 / 汇总 / 草稿逻辑：
- * 大框保存后写回原 textarea 并派发 input/change，原有草稿自动保存照常触发。
+ * V9：全站 textarea「放大编辑」（通用版，覆盖所有小框）
+ * 覆盖：日报/周报/月报 的 其他·计划·欠款·业绩分析、客户历史/跟进、
+ *       以及弹窗里动态生成的编辑框（自动发现 + 动态绑定）
+ * 排除：CSV 批量导入框、只读/禁用框、大框自身
+ * 触发：小框（高度 < 120px）单击放大；任何框都可双击 或 点标签旁「⤢ 放大」
+ * 保存：写回原 textarea 并派发 input/change，原有草稿自动保存 / 汇总逻辑照常触发
+ * 增强：大框底部实时字数行数统计；Ctrl/⌘ + Enter 保存；Esc 保存并关闭
  * ============================================================ */
 (function () {
   "use strict";
 
-  var TARGETS = [
-    { id: "d-today-other", title: "今日其他工作" },
-    { id: "w-week-other-mon", title: "周一其他" },
-    { id: "w-week-other-tue", title: "周二其他" },
-    { id: "w-week-other-wed", title: "周三其他" },
-    { id: "w-week-other-thu", title: "周四其他" },
-    { id: "w-week-other-fri", title: "周五其他" },
-    { id: "m-month-other-week1", title: "第一周其他" },
-    { id: "m-month-other-week2", title: "第二周其他" },
-    { id: "m-month-other-week3", title: "第三周其他" },
-    { id: "m-month-other-week4", title: "第四周其他" }
-  ];
+  // 不参与放大的框（批量导入 CSV 等专用大框）
+  var EXCLUDE_IDS = { "clientCsvInput": 1 };
+  // 小于此高度的框：单击即可放大（更高的框不劫持单击，避免影响直接输入）
+  var SMALL_LIMIT = 120;
 
-  var overlay = null, bigTa = null, bigTitle = null;
+  var overlay = null, bigTa = null, bigTitle = null, bigCount = null;
   var curEl = null, origVal = "";
+
+  function hasLabel(el) {
+    var lab = el.previousElementSibling;
+    return !!(lab && /^LABEL$/i.test(lab.tagName));
+  }
+
+  // 是否纳入放大：textarea 全部（除排除项）；单行 input 只收「有标签的表单字段」
+  // （表格内联输入框不加，避免多余按钮与误触）
+  function isTarget(el) {
+    if (!el) return false;
+    if (el.classList && el.classList.contains("zoom-ta")) return false;
+    if (el.readOnly || el.disabled) return false;
+    if (el.id && EXCLUDE_IDS[el.id]) return false;
+    var tn = el.tagName;
+    if (tn === "TEXTAREA") return true;
+    if (tn === "INPUT") {
+      var t = (el.type || "text").toLowerCase();
+      if (["text", "search", "url", "tel", "email"].indexOf(t) < 0) return false;
+      return hasLabel(el);
+    }
+    return false;
+  }
+
+  // 取一个好认的名字：label > placeholder > aria-label > id
+  function titleOf(el) {
+    var lab = el.previousElementSibling;
+    if (lab && /^LABEL$/i.test(lab.tagName)) {
+      try {
+        var c = lab.cloneNode(true);
+        var chips = c.querySelectorAll(".zoom-chip");
+        for (var i = 0; i < chips.length; i++) chips[i].parentNode.removeChild(chips[i]);
+        var t = (c.textContent || "").replace(/\s+/g, " ").trim();
+        if (t) return t;
+      } catch (e) {
+        var raw = (lab.textContent || "").replace(/⤢\s*放大/g, "").trim();
+        if (raw) return raw;
+      }
+    }
+    var ph = el.getAttribute("placeholder");
+    if (ph && ph.trim()) return ph.trim().slice(0, 24);
+    var al = el.getAttribute("aria-label");
+    if (al && al.trim()) return al.trim();
+    return el.id || "内容";
+  }
+
+  function updateCount() {
+    if (!bigCount || !bigTa) return;
+    var v = bigTa.value || "";
+    var lines = v.split("\n").filter(function (s) { return s.trim(); }).length;
+    bigCount.textContent = v.length + " 字 · " + lines + " 行";
+  }
 
   function ensure() {
     if (overlay) return overlay;
@@ -524,9 +571,11 @@
     overlay.innerHTML =
       '<div class="zoom-card">' +
         '<div class="zoom-head"><span class="zoom-title"></span>' +
+        '<span class="zoom-count"></span>' +
         '<button class="zoom-x" type="button" title="关闭（保存）">✕</button></div>' +
         '<div class="zoom-body"><textarea class="zoom-ta" spellcheck="false"></textarea></div>' +
         '<div class="zoom-foot">' +
+          '<span class="zoom-hint">Ctrl / ⌘ + Enter 保存 · Esc 保存并关闭</span>' +
           '<button class="zoom-btn" type="button" data-act="cancel">取消</button>' +
           '<button class="zoom-btn primary" type="button" data-act="save">保存</button>' +
         '</div>' +
@@ -534,6 +583,13 @@
     document.body.appendChild(overlay);
     bigTa = overlay.querySelector(".zoom-ta");
     bigTitle = overlay.querySelector(".zoom-title");
+    bigCount = overlay.querySelector(".zoom-count");
+
+    bigTa.addEventListener("input", updateCount);
+    bigTa.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); }
+      else if (e.key === "Escape") { e.preventDefault(); commit(); }
+    });
 
     overlay.addEventListener("click", function (e) {
       var t = e.target;
@@ -552,15 +608,16 @@
     return overlay;
   }
 
-  function open(field) {
-    var el = document.getElementById(field.id);
+  function open(el) {
     if (!el) return;
     ensure();
     curEl = el;
     origVal = el.value;
-    bigTitle.textContent = "✏️ " + field.title + "（放大编辑）";
+    bigTitle.textContent = "✏️ " + titleOf(el) + "（放大编辑）";
     bigTa.value = el.value;
+    bigTa.placeholder = el.getAttribute("placeholder") || "";
     overlay.style.display = "flex";
+    updateCount();
     setTimeout(function () {
       try {
         bigTa.focus();
@@ -590,28 +647,65 @@
     close();
   }
 
-  function bind() {
-    TARGETS.forEach(function (f) {
-      var el = document.getElementById(f.id);
-      if (!el || el.dataset.zoomBound === "1") return;
-      el.dataset.zoomBound = "1";
+  function bindOne(el) {
+    if (!isTarget(el) || el.dataset.zoomBound === "1") return;
+    el.dataset.zoomBound = "1";
+    var isTa = el.tagName === "TEXTAREA";
+    if (isTa) {
       el.classList.add("zoomable-ta");
-      el.setAttribute("title", "点击放大编辑");
-      el.addEventListener("click", function (e) { e.preventDefault(); open(f); });
-      // 标签旁加一颗「⤢ 放大」小按钮，方便发现
-      var lab = el.previousElementSibling;
-      if (lab && /^LABEL$/i.test(lab.tagName) && !lab.querySelector(".zoom-chip")) {
-        var chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "zoom-chip";
-        chip.textContent = "⤢ 放大";
-        chip.title = "放大编辑";
-        chip.addEventListener("click", function (e) { e.preventDefault(); open(f); });
-        lab.appendChild(chip);
-      }
-    });
+      el.setAttribute("title", "点击 / 双击 放大编辑");
+      // 小框：单击直接放大（看得不全，正需要）；大框：不劫持单击，交给 ⤢ / 双击
+      el.addEventListener("click", function (e) {
+        var h = el.offsetHeight || 0;
+        if (h && h > SMALL_LIMIT) return;
+        e.preventDefault();
+        open(el);
+      });
+      el.addEventListener("dblclick", function (e) { e.preventDefault(); open(el); });
+    } else {
+      el.setAttribute("title", "点标签旁「⤢ 放大」可放大编辑");
+    }
+    // 标签旁加一颗「⤢ 放大」小按钮，方便发现
+    var lab = el.previousElementSibling;
+    if (lab && /^LABEL$/i.test(lab.tagName) && !lab.querySelector(".zoom-chip")) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "zoom-chip";
+      chip.textContent = "⤢ 放大";
+      chip.title = "放大编辑";
+      chip.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); open(el); });
+      lab.appendChild(chip);
+    }
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
-  else bind();
+  var scanTimer = null;
+  function bind() {
+    var list = document.querySelectorAll("textarea, input[type=text], input[type=search]");
+    for (var i = 0; i < list.length; i++) bindOne(list[i]);
+  }
+  function scheduleScan() {
+    if (scanTimer) return;
+    scanTimer = setTimeout(function () { scanTimer = null; bind(); }, 250);
+  }
+
+  function start() {
+    bind();
+    // 弹窗 / 表格里动态生成的 textarea 也能用
+    if (window.MutationObserver) {
+      try {
+        var mo = new MutationObserver(scheduleScan);
+        mo.observe(document.body, { childList: true, subtree: true });
+      } catch (e) {}
+    }
+    setInterval(scheduleScan, 5000);
+    window.addEventListener("click", scheduleScan, true);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+
+  window.zoomEditOpen = function (id) {
+    var el = document.getElementById(id);
+    if (el) open(el);
+  };
 })();

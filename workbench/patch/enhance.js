@@ -585,8 +585,17 @@
           (Array.isArray(remote) ? remote : []).forEach(function (t) {
             if (!t || !t.id) return;
             if (tmap[t.id]) {
-              // 完成态并集：本地已完成或远端已完成都算完成，避免被陈旧版本回滚
-              tmap[t.id] = Object.assign({}, tmap[t.id], { done: !!(tmap[t.id].done || t.done) });
+              var a = tmap[t.id], b = t;
+              var ta = Number(a.doneTs) || 0, tb = Number(b.doneTs) || 0;
+              var doneVal;
+              if (ta || tb) {
+                // 有「最后改动时间」：以最新一次操作为准 —— 勾选与取消勾选都能正确同步
+                doneVal = (tb > ta) ? !!b.done : !!a.done;
+              } else {
+                // 老数据没有时间戳：仍是并集，防止刚勾选的完成态被陈旧云端版本回滚
+                doneVal = !!(a.done || b.done);
+              }
+              tmap[t.id] = Object.assign({}, a, { done: doneVal, doneTs: Math.max(ta, tb) || undefined });
             } else {
               tmap[t.id] = t;
             }

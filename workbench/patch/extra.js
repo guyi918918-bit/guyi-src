@@ -709,3 +709,155 @@
     if (el) open(el);
   };
 })();
+
+/* ============================================================
+ * V10 修复包（只修 bug，不动布局与原有交互）
+ * 1) 周报 / 月报：已保存的人工字段（目标·完成·欠款·客情·培训内容·下周/下月计划·业绩分析）
+ *    在切周切月、刷新汇总、打开面板时自动回填 —— 解决「保存了下次打开看不到」
+ * 2) 周报 / 月报「其他」：刷新汇总时保留手工补充的行（增量去重，不会复活已删内容）
+ * 3) 编辑历史记录弹窗：改动「目标 / 完成」时「差额」实时重算
+ *    （原来靠 innerHTML 注入 <script> 绑定，而 innerHTML 插入的脚本不会执行，
+ *     导致编辑周/月报后保存的差额是旧值）
+ * ============================================================ */
+(function () {
+  "use strict";
+  var K_WEEKLY = "sport_weekly_list";
+  var K_MONTHLY = "sport_monthly_list";
+
+  function arr(k) { try { return JSON.parse(localStorage.getItem(k) || "[]") || []; } catch (e) { return []; } }
+  function lines(v) { return String(v || "").split("\n").map(function (s) { return s.trim(); }).filter(Boolean); }
+  function mergeLines(baseText, extraLines) {
+    var out = lines(baseText);
+    (extraLines || []).forEach(function (l) { if (out.indexOf(l) < 0) out.push(l); });
+    return out.join("\n");
+  }
+  function setVal(id, v) {
+    var el = document.getElementById(id);
+    if (el && v !== undefined && v !== null && v !== "") el.value = v;
+  }
+  function updDiff(tid, fid, did) {
+    var t = document.getElementById(tid), f = document.getElementById(fid), d = document.getElementById(did);
+    if (t && f && d) d.value = ((Number(f.value) || 0) - (Number(t.value) || 0)).toFixed(2);
+  }
+
+  var WEEK_TEXT = [["w-target", "target"], ["w-finish", "finish"], ["w-debt", "debt"],
+    ["w-cusmanage", "cusmanage"], ["w-train-text", "trainText"], ["w-nextplan", "nextPlan"]];
+  var WEEK_OTHER = [["w-week-other-mon", "weekOtherMon"], ["w-week-other-tue", "weekOtherTue"],
+    ["w-week-other-wed", "weekOtherWed"], ["w-week-other-thu", "weekOtherThu"], ["w-week-other-fri", "weekOtherFri"]];
+  var MONTH_TEXT = [["m-target", "target"], ["m-finish", "finish"], ["m-debt", "debt"],
+    ["m-cusmanage", "cusmanage"], ["m-train-text", "trainText"], ["m-nextplan", "nextPlan"], ["m-analysis", "analysis"]];
+  var MONTH_OTHER = [["m-month-other-week1", "monthOtherWeek1"], ["m-month-other-week2", "monthOtherWeek2"],
+    ["m-month-other-week3", "monthOtherWeek3"], ["m-month-other-week4", "monthOtherWeek4"]];
+
+  function restoreWeek(manual) {
+    var wk = document.getElementById("w-week");
+    var weekStr = wk ? wk.value : "";
+    if (!weekStr) return;
+    var rec = arr(K_WEEKLY).filter(function (x) { return x.week === weekStr; })[0];
+    if (!rec) {
+      WEEK_OTHER.forEach(function (p) {
+        var el = document.getElementById(p[0]);
+        if (el && manual && manual[p[0]] && manual[p[0]].length) el.value = mergeLines(el.value, manual[p[0]]);
+      });
+      return;
+    }
+    WEEK_TEXT.forEach(function (p) { setVal(p[0], rec[p[1]]); });
+    WEEK_OTHER.forEach(function (p) {
+      var el = document.getElementById(p[0]);
+      if (el) el.value = mergeLines(rec[p[1]], manual && manual[p[0]]);
+    });
+    updDiff("w-target", "w-finish", "w-diff");
+  }
+
+  function restoreMonth(manual) {
+    var mk = document.getElementById("m-month");
+    var monthStr = mk ? mk.value : "";
+    if (!monthStr) return;
+    var rec = arr(K_MONTHLY).filter(function (x) { return x.month === monthStr; })[0];
+    if (!rec) {
+      MONTH_OTHER.forEach(function (p) {
+        var el = document.getElementById(p[0]);
+        if (el && manual && manual[p[0]] && manual[p[0]].length) el.value = mergeLines(el.value, manual[p[0]]);
+      });
+      return;
+    }
+    MONTH_TEXT.forEach(function (p) { setVal(p[0], rec[p[1]]); });
+    MONTH_OTHER.forEach(function (p) {
+      var el = document.getElementById(p[0]);
+      if (el) el.value = mergeLines(rec[p[1]], manual && manual[p[0]]);
+    });
+    updDiff("m-target", "m-finish", "m-diff");
+  }
+
+  // 包装原有「刷新汇总」：先保留手工补充行，再回填已保存内容
+  function wrapAuto(name, otherList, restore) {
+    var orig = window[name];
+    if (typeof orig !== "function" || orig.__fxWrapped) return;
+    var wrapped = function () {
+      var before = {};
+      otherList.forEach(function (p) {
+        var el = document.getElementById(p[0]);
+        before[p[0]] = el ? el.value : "";
+      });
+      var r;
+      try { r = orig.apply(this, arguments); } catch (e) { r = undefined; }
+      var manual = {};
+      otherList.forEach(function (p) {
+        var el = document.getElementById(p[0]);
+        var after = el ? el.value : "";
+        var a = lines(after);
+        manual[p[0]] = lines(before[p[0]]).filter(function (l) { return a.indexOf(l) < 0; });
+      });
+      try { restore(manual); } catch (e) {}
+      return r;
+    };
+    wrapped.__fxWrapped = true;
+    window[name] = wrapped;
+  }
+
+  // 勾选 / 取消勾选时记录「最后改动时间」，让多端同步能分辨哪次操作更新
+  // （否则云端合并只能取并集，导致「取消勾选」永远同步不出去）
+  function wrapTodoToggle() {
+    var orig = window.toggleTodo;
+    if (typeof orig !== "function" || orig.__fxStamp) return;
+    var wrapped = function (id) {
+      var r = orig.apply(this, arguments);
+      try {
+        var list = window.getTodos ? window.getTodos() : JSON.parse(localStorage.getItem("sport_todos") || "[]");
+        if (Array.isArray(list)) {
+          for (var i = 0; i < list.length; i++) {
+            if (String(list[i].id) === String(id)) { list[i].doneTs = Date.now(); break; }
+          }
+          if (window.setTodos) window.setTodos(list);
+          else localStorage.setItem("sport_todos", JSON.stringify(list));
+        }
+      } catch (e) {}
+      return r;
+    };
+    wrapped.__fxStamp = true;
+    window.toggleTodo = wrapped;
+  }
+
+  function start() {
+    wrapAuto("loadWeekAutoData", WEEK_OTHER, restoreWeek);
+    wrapAuto("loadMonthAutoData", MONTH_OTHER, restoreMonth);
+    wrapTodoToggle();
+
+    // 编辑历史记录弹窗：目标 / 完成 变化时实时重算差额
+    document.addEventListener("input", function (e) {
+      var id = e.target && e.target.id;
+      if (id === "edit-target" || id === "edit-finish") updDiff("edit-target", "edit-finish", "edit-diff");
+    });
+
+    // 进入周报 / 月报面板时立刻回填一次
+    var timer = setInterval(function () {
+      if (!document.getElementById("w-week")) return;
+      clearInterval(timer);
+      try { restoreWeek(null); } catch (e) {}
+      try { restoreMonth(null); } catch (e) {}
+    }, 800);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
